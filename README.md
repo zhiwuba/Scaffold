@@ -6,4 +6,12 @@ PHP Frame
 3. mvc
 4. ORMapping
 5. plugin
-6. ...
+6.
+
+
+
+1. 遵守PSR标准
+2.
+3.
+
+
