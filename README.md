@@ -1,17 +1,26 @@
-# Scaffold
+# Scaffold Design Document
 PHP Frame
 
+
+##Foundation
 1. router
 2. request response session cookie 
 3. mvc
 4. ORMapping
 5. plugin
-6.
+
+
+##Standard 
+1. psr1
+2. psr3
+3. psr4
+4. psr7
 
 
 
-1. 遵守PSR标准
-2.
-3.
 
+##Component
+1. Redis Memcache
+2. Mysql MongoDB Cassandra
+3. ElasticSearch
 
