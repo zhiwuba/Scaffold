@@ -23,6 +23,8 @@ namespace Scaffold\Http;
  */
 class Request extends Message
 {
+    protected $method;
+
 
     public function __construct( Uri $uri )
     {
@@ -142,11 +144,11 @@ class Request extends Message
      * new UriInterface instance.
      *
      * @link http://tools.ietf.org/html/rfc3986#section-4.3
-     * @param UriInterface $uri New request URI to use.
+     * @param Uri $uri New request URI to use.
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return self
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(Uri $uri, $preserveHost = false)
     {
 
     }

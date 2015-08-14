@@ -303,7 +303,21 @@ class Uri
      */
     public function withPort($port)
     {
-
+        $instance=clone $this;
+        if( $port===NULL )
+        {
+            $instance->port=NULL;
+            return $instance;
+        }
+        else if( $port>=0 && $port<=65535  )
+        {
+            $instance->port=$port;
+            return $instance;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid port");
+        }
     }
 
     /**

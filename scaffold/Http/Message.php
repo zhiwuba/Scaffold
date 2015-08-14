@@ -22,6 +22,9 @@ namespace Scaffold\Http;
  */
 class Message
 {
+    protected $headers;
+    protected $version;
+
     /**
      * Retrieves the HTTP protocol version as a string.
      *
@@ -31,7 +34,7 @@ class Message
      */
     public function getProtocolVersion()
     {
-
+        return $this->version;
     }
 
     /**
@@ -49,7 +52,10 @@ class Message
      */
     public function withProtocolVersion($version)
     {
-
+        if( $version=='1.1' || $version=='1.0' ){
+            $this->version=$version;
+        }
+        return $this;
     }
 
     /**
@@ -79,7 +85,7 @@ class Message
      */
     public function getHeaders()
     {
-
+        return $this->headers;
     }
 
     /**
@@ -92,7 +98,7 @@ class Message
      */
     public function hasHeader($name)
     {
-
+        return array_key_exists($name, $this->headers);
     }
 
     /**
@@ -111,7 +117,11 @@ class Message
      */
     public function getHeader($name)
     {
-
+        if( isset($this->headers[$name]) ) {
+            return $this->headers[$name];
+        }else{
+            return [];
+        }
     }
 
     /**

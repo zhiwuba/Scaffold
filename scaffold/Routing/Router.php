@@ -6,6 +6,7 @@
  * Time: 23:52
  */
 
+namespace Scaffold\Routing;
 
 
 class Router
@@ -52,13 +53,18 @@ class Router
 
     protected function findRoute($uri)
     {
+        $routes=[];
         foreach($this->routes as $route)
         {
             if($route->matchPattern($uri) )
             {
-
+                $routes[]=$route;
             }
         }
+        return $routes;
     }
+
+
+
 }
 

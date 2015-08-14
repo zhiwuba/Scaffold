@@ -1,6 +1,6 @@
 <?php
 
-namespace Psr\Log;
+namespace Scaffold\Log;
 
 /**
  * This is a simple Logger implementation that other Loggers can inherit from.
@@ -9,7 +9,7 @@ namespace Psr\Log;
  * reduce boilerplate code that a simple Logger that does the same thing with
  * messages regardless of the error level has to implement.
  */
-abstract class Logger implements LoggerInterface
+class Logger
 {
     /**
      * System is unusable.
@@ -138,7 +138,7 @@ abstract class Logger implements LoggerInterface
     public function log($level, $message, array $context = array())
     {
         // TODO: Implement log() method.
-
+        echo $message . '\n';
     }
 
 }

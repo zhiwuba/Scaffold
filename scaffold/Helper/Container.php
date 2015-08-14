@@ -6,109 +6,86 @@
  * Time: 0:21
  */
 
-namespace Slim\Helper;
-
-use Traversable;
+namespace Scaffold\Helper;
 
 class Container implements \ArrayAccess, \Countable, \IteratorAggregate
 {
+    protected $data=[];
 
-    public function singleton()
+    /**
+    *  set instance.
+    */
+    public function singleton($key, $value )
     {
+        $this->set($key, function ($param) use ($value) {
+            static $object;
 
-    }
-
-    public function protect(\Closure $callable)
-    {
-
+            if( null === $object ){
+                $object=$value($param);
+            }
+            return $object;
+        });
     }
 
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Retrieve an external iterator
-     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
-     * <b>Traversable</b>
-     */
+    *   interface implements.
+    */
     public function getIterator()
     {
-        // TODO: Implement getIterator() method.
+        return new \ArrayIterator($this->data);
     }
 
-    /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Whether a offset exists
-     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
-     * @param mixed $offset <p>
-     * An offset to check for.
-     * </p>
-     * @return boolean true on success or false on failure.
-     * </p>
-     * <p>
-     * The return value will be casted to boolean if non-boolean was returned.
-     */
     public function offsetExists($offset)
     {
-        // TODO: Implement offsetExists() method.
+        return $this->has($offset);
     }
 
-    /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to retrieve
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset <p>
-     * The offset to retrieve.
-     * </p>
-     * @return mixed Can return all value types.
-     */
     public function offsetGet($offset)
     {
-        // TODO: Implement offsetGet() method.
+        return $this->get($offset);
     }
 
-    /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to set
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param mixed $offset <p>
-     * The offset to assign the value to.
-     * </p>
-     * @param mixed $value <p>
-     * The value to set.
-     * </p>
-     * @return void
-     */
     public function offsetSet($offset, $value)
     {
-        // TODO: Implement offsetSet() method.
+        $this->set($offset, $value);
     }
 
-    /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to unset
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param mixed $offset <p>
-     * The offset to unset.
-     * </p>
-     * @return void
-     */
     public function offsetUnset($offset)
     {
-        // TODO: Implement offsetUnset() method.
+        $this->remove($offset);
     }
 
-    /**
-     * (PHP 5 &gt;= 5.1.0)<br/>
-     * Count elements of an object
-     * @link http://php.net/manual/en/countable.count.php
-     * @return int The custom count as an integer.
-     * </p>
-     * <p>
-     * The return value is cast to an integer.
-     */
     public function count()
     {
-        // TODO: Implement count() method.
+        return count($this->data);
     }
+
+
+    /**
+    *  function
+    */
+    public function get( $key, $default=null )
+    {
+        if( $this->has($key) ) {
+            return $this->data[$key];
+        }
+        return $default;
+    }
+
+    public function set($key, $value)
+    {
+        $this->data[$key]=$value;
+    }
+
+    public function has($key)
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    public function remove($key)
+    {
+        unset($this->data[$key]);
+    }
+
 }
