@@ -12,6 +12,13 @@ namespace Scaffold\Application;
 
 class Application
 {
+    protected $container;
+
+    public function __construct()
+    {
+        $this->container=new \Slim\Helper\Container();
+    }
+
     public function  run()
     {
 
