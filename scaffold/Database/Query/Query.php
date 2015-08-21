@@ -6,6 +6,7 @@
  * Time: 下午3:08
  */
 
+namespace Scaffold\Database\Model;
 
 abstract class Query
 {

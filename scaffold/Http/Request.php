@@ -26,7 +26,7 @@ class Request extends Message
     protected $method;
 
 
-    public function __construct( Uri $uri )
+    public function __construct($uri)
     {
 
     }
@@ -110,7 +110,7 @@ class Request extends Message
      * This method MUST return a UriInterface instance.
      *
      * @link http://tools.ietf.org/html/rfc3986#section-4.3
-     * @return UriInterface Returns a UriInterface instance
+     * @return Uri Returns a UriInterface instance
      *     representing the URI of the request.
      */
     public function getUri()

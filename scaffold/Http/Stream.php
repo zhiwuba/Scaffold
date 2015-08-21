@@ -10,7 +10,7 @@ namespace Scaffold\Http;
  * a wrapper around the most common operations, including serialization of
  * the entire stream to a string.
  */
-interface StreamInterface
+class Stream
 {
     /**
      * Reads all data from the stream into a string, from the beginning to end.
@@ -26,14 +26,20 @@ interface StreamInterface
      * @see http://php.net/manual/en/language.oop5.magic.php#object.tostring
      * @return string
      */
-    public function __toString();
+    public function __toString()
+    {
+
+    }
 
     /**
      * Closes the stream and any underlying resources.
      *
      * @return void
      */
-    public function close();
+    public function close()
+    {
+
+    }
 
     /**
      * Separates any underlying resources from the stream.
@@ -42,14 +48,20 @@ interface StreamInterface
      *
      * @return resource|null Underlying PHP stream, if any
      */
-    public function detach();
+    public function detach()
+    {
+
+    }
 
     /**
      * Get the size of the stream if known.
      *
      * @return int|null Returns the size in bytes if known, or null if unknown.
      */
-    public function getSize();
+    public function getSize()
+    {
+
+    }
 
     /**
      * Returns the current position of the file read/write pointer
@@ -57,21 +69,30 @@ interface StreamInterface
      * @return int Position of the file pointer
      * @throws \RuntimeException on error.
      */
-    public function tell();
+    public function tell()
+    {
+
+    }
 
     /**
      * Returns true if the stream is at the end of the stream.
      *
      * @return bool
      */
-    public function eof();
+    public function eof()
+    {
+
+    }
 
     /**
      * Returns whether or not the stream is seekable.
      *
      * @return bool
      */
-    public function isSeekable();
+    public function isSeekable()
+    {
+
+    }
 
     /**
      * Seek to a position in the stream.
@@ -85,7 +106,10 @@ interface StreamInterface
      *     SEEK_END: Set position to end-of-stream plus offset.
      * @throws \RuntimeException on failure.
      */
-    public function seek($offset, $whence = SEEK_SET);
+    public function seek($offset, $whence = SEEK_SET)
+    {
+
+    }
 
     /**
      * Seek to the beginning of the stream.
@@ -97,14 +121,20 @@ interface StreamInterface
      * @link http://www.php.net/manual/en/function.fseek.php
      * @throws \RuntimeException on failure.
      */
-    public function rewind();
+    public function rewind()
+    {
+
+    }
 
     /**
      * Returns whether or not the stream is writable.
      *
      * @return bool
      */
-    public function isWritable();
+    public function isWritable()
+    {
+
+    }
 
     /**
      * Write data to the stream.
@@ -113,14 +143,20 @@ interface StreamInterface
      * @return int Returns the number of bytes written to the stream.
      * @throws \RuntimeException on failure.
      */
-    public function write($string);
+    public function write($string)
+    {
+
+    }
 
     /**
      * Returns whether or not the stream is readable.
      *
      * @return bool
      */
-    public function isReadable();
+    public function isReadable()
+    {
+
+    }
 
     /**
      * Read data from the stream.
@@ -132,7 +168,10 @@ interface StreamInterface
      *     if no bytes are available.
      * @throws \RuntimeException if an error occurs.
      */
-    public function read($length);
+    public function read($length)
+    {
+
+    }
 
     /**
      * Returns the remaining contents in a string
@@ -141,7 +180,10 @@ interface StreamInterface
      * @throws \RuntimeException if unable to read or an error occurs while
      *     reading.
      */
-    public function getContents();
+    public function getContents()
+    {
+
+    }
 
     /**
      * Get stream metadata as an associative array or retrieve a specific key.
@@ -155,5 +197,8 @@ interface StreamInterface
      *     provided. Returns a specific key value if a key is provided and the
      *     value is found, or null if the key is not found.
      */
-    public function getMetadata($key = null);
+    public function getMetadata($key = null)
+    {
+
+    }
 }

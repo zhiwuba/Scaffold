@@ -12,6 +12,7 @@ use Scaffold\Helper\Container;
 
 /**
  *  Application
+ * @property \Scaffold\Routing\Router $router
 *  @property  \Scaffold\Http\Request $request
  * @property  \Scaffold\Http\Response $response
  * @property  \Scaffold\Log\Logger    $logger
@@ -25,7 +26,7 @@ class Application
         $this->container=new Container();
 
         $this->container->singleton('request', function(){
-            return new \Scaffold\Http\Request();
+            return new \Scaffold\Http\Request(''); //TODO
         });
 
         $this->container->singleton('response', function(){
@@ -39,6 +40,19 @@ class Application
         $this->container->singleton('router', function(){
             return new \Scaffold\Routing\Router();
         });
+
+        $this->container->singleton('cookie', function(){
+           return new \Scaffold\Http\Cookie();
+        });
+
+        $this->container->singleton('session', function(){
+            return new \Scaffold\Session\Session();
+        });
+
+        $this->container->singleton('view', function(){
+            return new \Scaffold\View\View();
+        });
+
     }
 
     public function __get($name)
@@ -61,20 +75,35 @@ class Application
         $this->container->remove($name);
     }
 
+    public function sourceRouteFile($filePath)
+    {
+        require_once "$filePath";
+    }
 
     public function  run()
     {
-        $this->router->call();
+        try
+        {
+            $this->router->
+            $this->router->call();
 
-        if( headers_sent() === false ){
-            $headers=$this->response->getHeaders();
-            foreach($headers as $name=>$values){
-                foreach($values as $value){
-                    header("$name: $value", false);
+            if( headers_sent() === false ){
+                $headers=$this->response->getHeaders();
+                foreach($headers as $name=>$values){
+                    foreach($values as $value){
+                        header("$name: $value", false);
+                    }
                 }
             }
-        }
 
-        echo $this->response->getBody();
+            echo $this->response->getBody();
+        }
+        catch(\Exception $e)
+        {
+            echo $e->getMessage() . '<br>';
+            echo $e->getLine() . '<br>';
+            print_r($e->getTrace());
+            exit;
+        }
     }
 }

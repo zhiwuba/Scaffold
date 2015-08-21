@@ -25,7 +25,7 @@ interface UploadedFileInterface
      * If the moveTo() method has been called previously, this method MUST raise
      * an exception.
      *
-     * @return StreamInterface Stream representation of the uploaded file.
+     * @return Stream Stream representation of the uploaded file.
      * @throws \RuntimeException in cases when no stream is available or can be
      *     created.
      */
