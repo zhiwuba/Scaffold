@@ -23,12 +23,22 @@ namespace Scaffold\Http;
  */
 class Request extends Message
 {
-    protected $method;
+    const METHOD_HEAD = 'HEAD';
+    const METHOD_GET = 'GET';
+    const METHOD_POST = 'POST';
+    const METHOD_PUT = 'PUT';
+    const METHOD_PATCH = 'PATCH';
+    const METHOD_DELETE = 'DELETE';
+    const METHOD_OPTIONS = 'OPTIONS';
+    const METHOD_OVERRIDE = '_METHOD';
 
+    protected $method;
+    protected $uri;
 
     public function __construct($uri)
     {
-
+        $this->method=$_SERVER['REQUEST_METHOD'];
+        $this->uri=$uri;
     }
 
     /**
@@ -115,7 +125,7 @@ class Request extends Message
      */
     public function getUri()
     {
-
+        return $this->uri;
     }
 
     /**

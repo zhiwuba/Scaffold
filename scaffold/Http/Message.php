@@ -23,6 +23,7 @@ namespace Scaffold\Http;
 class Message
 {
     protected $headers;
+    protected $body;
     protected $version;
 
     /**
@@ -145,7 +146,13 @@ class Message
      */
     public function getHeaderLine($name)
     {
-
+        if( isset($this->headers[$name]) ) {
+            $result=implode(',' , $this->headers[$name]);
+        }
+        else {
+            $result='';
+        }
+        return $result;
     }
 
 
@@ -166,7 +173,20 @@ class Message
      */
     public function withHeader($name, $value)
     {
+        if( !empty($name) && (is_array($value) || is_string($value)) ){
+            if( !isset($this->headers[$name]) ) {
+                $this->headers[$name]=[];
+            }
 
+            if( is_array($value) ){
+                $this->headers[$name]=array_merge($this->headers[$name], $value);
+            }else{
+                $this->headers[$name]=array_merge($this->headers[$name], [$value]);
+            }
+            return $this;
+        }else{
+            throw new \InvalidArgumentException(__FUNCTION__ );
+        }
     }
 
     /**
@@ -187,7 +207,16 @@ class Message
      */
     public function withAddedHeader($name, $value)
     {
+        if( !empty($name) && (is_array($value) || is_string($value)) ){
+            if( !isset($this->headers[$name]) ) {
+                $this->headers[$name]=[];
+            }
 
+            array_push($this->headers[$name], $value);
+            return $this;
+        }else{
+            throw new \InvalidArgumentException(__FUNCTION__ );
+        }
     }
 
     /**
@@ -204,7 +233,10 @@ class Message
      */
     public function withoutHeader($name)
     {
-
+        if( isset($this->headers[$name]) ) {
+            unset($this->headers[$name]);
+        }
+        return $this;
     }
 
     /**
@@ -214,7 +246,9 @@ class Message
      */
     public function getBody()
     {
-
+        $stream=new Stream();
+        $stream->write($this->body);
+        return $stream;
     }
 
     /**
@@ -232,6 +266,8 @@ class Message
      */
     public function withBody(Stream $body)
     {
-
+        $instance=clone $this;
+        $instance->body=$body->getContents();
+        return $instance;
     }
 }

@@ -24,21 +24,49 @@ namespace Scaffold\Http;
  */
 class Uri
 {
-    protected $uri;
     protected $scheme;
-    protected $authority;
     protected $host;
     protected $port;
-    protected $userInfo;
+    protected $username;
+    protected $password;
     protected $path;
     protected $query;
     protected $fragment;
 
 
-    public function __construct($uri)
+    public function __construct($scheme, $host, $port, $user, $pass, $path, $query, $fragment)
     {
-
+        $this->scheme=$scheme;
+        $this->host=$host;
+        $this->port=$port;
+        $this->username=$user;
+        $this->password=$pass;
+        $this->path=$path;
+        $this->query=$query;
+        $this->fragment=$fragment;
     }
+
+    public static function createFromString($uri)
+    {
+        $url=parse_url($uri);
+        if( $url!==FALSE )
+        {
+            $scheme= isset($url['schema'])? $url['schema'] : '';
+            $host=isset($url['host'])? $url['host'] : '';
+            $port=isset($url['port'])? $url['post'] : null;
+            $user=isset($url['user'])? $url['user'] : '';
+            $pass=isset($url['pass'])? $url['pass'] : '';
+            $path=isset($url['path'])? $url['path'] : '';
+            $query=isset($url['query'])? $url['query'] : '';
+            $fragment=isset($url['fragment'])? $url['fragment'] : '';
+            return new Uri($scheme, $host, $port, $user, $pass, $path, $query, $fragment);
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
 
     /**
      * Retrieve the scheme component of the URI.
@@ -79,7 +107,21 @@ class Uri
      */
     public function getAuthority()
     {
-        return $this->authority;
+        $authority="";
+        if( isset($this->username) ){
+            $authority=$this->username;
+            if( isset($this->password) ){
+                $authority .= ":{$this->password}@";
+            }
+        }
+
+        $authority .= $this->host;
+
+        if( isset($this->port) ){
+            $authority="$authority:{$this->port}";
+        }
+
+        return $authority;
     }
 
     /**
@@ -99,7 +141,14 @@ class Uri
      */
     public function getUserInfo()
     {
-        return $this->userInfo;
+        $userInfo="";
+        if( isset($this->username) ){
+            $userInfo=$this->username;
+            if( isset($this->password) ){
+                $userInfo .= ":{$this->password}";
+            }
+        }
+        return $userInfo;
     }
 
 
@@ -234,7 +283,17 @@ class Uri
      */
     public function withScheme($scheme)
     {
-
+        $instance=clone $this;
+        $scheme= strtolower($scheme);
+        if( in_array(['http', 'https'],$scheme) )
+        {
+            $instance->scheme=$scheme;
+            return $instance;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid schema");
+        }
     }
 
     /**
@@ -279,9 +338,16 @@ class Uri
      */
     public function withHost($host)
     {
-        $instance=clone $this;
-        $instance->host=$host;
-        return $instance;
+        if( true )
+        {
+            $instance=clone $this;
+            $instance->host=$host;
+            return $instance;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid host");
+        }
     }
 
     /**
@@ -344,7 +410,17 @@ class Uri
      */
     public function withPath($path)
     {
-
+        if( $path==='' || preg_match("/^[\\w/]+$/",$path) )
+        {
+            $instance=clone $this;
+            $path=urldecode($path);
+            $this->path=$path;
+            return $instance;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid path");
+        }
     }
 
     /**
@@ -364,7 +440,17 @@ class Uri
      */
     public function withQuery($query)
     {
-
+        if ( true )
+        {
+            $query=urldecode($query);
+            $instance=clone $this;
+            $instance->query=$query;
+            return $instance;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid query");
+        }
     }
 
     /**
@@ -383,7 +469,9 @@ class Uri
      */
     public function withFragment($fragment)
     {
-
+        $instance=clone $this;
+        $instance->fragment=$fragment;
+        return $instance;
     }
 
     /**

@@ -26,7 +26,8 @@ class Application
         $this->container=new Container();
 
         $this->container->singleton('request', function(){
-            return new \Scaffold\Http\Request(''); //TODO
+            $uri=new \Scaffold\Http\Uri('');
+            return new \Scaffold\Http\Request($uri);
         });
 
         $this->container->singleton('response', function(){
@@ -80,23 +81,31 @@ class Application
         require_once "$filePath";
     }
 
+    public function sendHeader()
+    {
+        if( headers_sent() === false ){
+            $headers=$this->response->getHeaders();
+            foreach($headers as $name=>$values){
+                foreach($values as $value){
+                    header("$name: $value", false);
+                }
+            }
+        }
+    }
+
+    public function sendBody()
+    {
+        echo $this->response->getBody();
+    }
+
     public function  run()
     {
         try
         {
-            $this->router->
-            $this->router->call();
+            $this->router->dispatch($this->request->getUri(), $this->request->getMethod() );
 
-            if( headers_sent() === false ){
-                $headers=$this->response->getHeaders();
-                foreach($headers as $name=>$values){
-                    foreach($values as $value){
-                        header("$name: $value", false);
-                    }
-                }
-            }
-
-            echo $this->response->getBody();
+            $this->sendHeader();
+            $this->sendBody();
         }
         catch(\Exception $e)
         {

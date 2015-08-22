@@ -7,7 +7,7 @@
  */
 
 namespace Scaffold\Routing;
-
+use Scaffold\Http\Request;
 
 class Router
 {
@@ -21,25 +21,31 @@ class Router
     public static function get()
     {
         $args=func_get_args();
-        self::addRoute($args);
+        self::addRoute($args)->via(Request::METHOD_GET);
     }
 
     public static function post()
     {
         $args=func_get_args();
-        self::addRoute($args);
+        self::addRoute($args)->via(Request::METHOD_POST);
     }
 
     public static function put()
     {
         $args=func_get_args();
-        self::addRoute($args);
+        self::addRoute($args)->via(Request::METHOD_PUT);
     }
 
     public static function delete()
     {
         $args=func_get_args();
-        return self::addRoute($args)->via();
+        self::addRoute($args)->via(Request::METHOD_DELETE);
+    }
+
+    public static function any()
+    {
+        $args=func_get_args();
+        self::addRoute($args)->via("ANY");
     }
 
     protected function addRoute($args)
@@ -51,12 +57,15 @@ class Router
         return $route;
     }
 
-    protected function findRoute($uri)
+    /**
+    * @return array Scaffold\Routing\Route
+     */
+    public function findRoute($uri, $method)
     {
         $routes=[];
         foreach($this->routes as $route)
         {
-            if($route->matchPattern($uri) )
+            if($route->matchPattern($uri) && $route->supportMethod($method))
             {
                 $routes[]=$route;
             }
@@ -64,6 +73,14 @@ class Router
         return $routes;
     }
 
+    public function dispatch($uri, $method)
+    {
+        $routes=$this->findRoute($uri, $method );
+        foreach($routes as $route)
+        {
+            $route->dispatch();
+        }
+    }
 
 
 }

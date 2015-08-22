@@ -8,6 +8,8 @@
 
 namespace Scaffold\Routing;
 
+use \Scaffold\Http\Uri;
+
 class Route
 {
     protected $pattern;
@@ -22,6 +24,21 @@ class Route
     {
         $this->pattern=$pattern;
         $this->callback=$callback;
+    }
+
+    /**
+    *  http method
+     */
+    public function via()
+    {
+        $args=func_get_args();
+        array_merge($this->method, $args);
+    }
+
+    public function supportMethod($method)
+    {
+        $isSupport=in_array($method, $this->$method);
+        return $isSupport;
     }
 
     /**
@@ -71,8 +88,8 @@ class Route
 
     public function matchPattern($uri)
     {
-        $count=preg_match($this->regex, $uri, $matches);
-        if( $count==1 ) //匹配
+        $isMatch=preg_match($this->regex, $uri, $matches);
+        if( $isMatch)
         {
             $this->params=$matches;
             return true;
@@ -83,6 +100,7 @@ class Route
         }
     }
 
+
     public function dispatch()
     {
         if( is_string($this->callback) )
@@ -90,8 +108,7 @@ class Route
             $parts=explode('@' , $this->callback);
             if( count($parts)==2 )
             {
-                $controllerName=$parts[0];
-                $function = $parts[1];
+                list($controllerName, $function)=$parts;
                 $controller=new $controllerName;
                 call_user_func_array([$controller, $function], $this->params);
             }

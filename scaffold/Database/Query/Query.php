@@ -10,12 +10,20 @@ namespace Scaffold\Database\Model;
 
 abstract class Query
 {
+    protected $selects=[];
+    protected $wheres=[];
+    protected $orders=[];
+    protected $groups=[];
+    protected $skip;
+    protected $limit;
+    protected
 
     /**
     *  CRUD
     */
     public  function select()
     {
+        array_merge($this->selects, func_get_args());
         return $this;
     }
 
@@ -140,8 +148,6 @@ abstract class Query
     abstract public function min();
 
     abstract public function sum();
-
-
 
 }
 

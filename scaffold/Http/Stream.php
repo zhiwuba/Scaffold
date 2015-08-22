@@ -12,6 +12,14 @@ namespace Scaffold\Http;
  */
 class Stream
 {
+    protected $stream;
+    protected $readable;
+    protected $writable;
+    protected $seekable;
+    protected $meta;
+    protected $size;
+
+
     /**
      * Reads all data from the stream into a string, from the beginning to end.
      *
@@ -28,6 +36,7 @@ class Stream
      */
     public function __toString()
     {
+        fseek($this->stream, 0, SEEK_SET );
 
     }
 
@@ -38,7 +47,7 @@ class Stream
      */
     public function close()
     {
-
+        fclose($this->stream);
     }
 
     /**
