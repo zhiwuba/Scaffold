@@ -18,9 +18,16 @@ class Cookie
         $this->cookie=&$_COOKIE;
     }
 
-    public function get($name)
+    public function get($name, $default=NULL)
     {
-
+        if( isset($this->cookie[$name]) )
+        {
+            return $this->cookie[$name];
+        }
+        else
+        {
+            return $default;
+        }
     }
 
     public function set($name, $value, $expire, $path,$domain, $secure, $httponly )

@@ -12,12 +12,62 @@ namespace Scaffold\Http;
  */
 class Stream
 {
-    protected $stream;
-    protected $readable;
-    protected $writable;
-    protected $seekable;
-    protected $meta;
-    protected $size;
+    /**
+    *  @var resource $resource
+    */
+    protected $resource = null;
+
+    /**
+    *  @var array open mode
+    */
+    protected static $modes = [
+        'readable' => ['r', 'r+', 'w+', 'a+', 'x+', 'c+'],
+        'writable' => ['r+', 'w', 'w+', 'a', 'a+', 'x', 'x+', 'c', 'c+'],
+    ];
+
+    public function __construct($resource)
+    {
+        $this->resource=$resource;
+    }
+
+    /**
+     * create from file for UploadedFile.
+    * @param string $filename
+     *@return Stream
+     *@throws \Exception
+    */
+    public static function createFromFile($filename)
+    {
+        if( file_exists($filename) ){
+            $resource=fopen($filename, 'w+');
+            $stream=new Stream($resource);
+            return $stream;
+        }else{
+            throw new \Exception("$filename doesn't exist");
+        }
+    }
+
+    /**
+    *  create from temp for response
+     * @return Stream
+    */
+    public static function createFromTemp()
+    {
+        $resource=fopen('php://temp', 'r+');
+        $stream=new Stream($resource);
+        return $stream;
+    }
+
+    /**
+    *  copy from input for request.
+     * @return Stream
+    */
+    public static function createFromInput()
+    {
+        $resource=fopen('php://input',  'w+');
+        $stream=stream_copy_to_stream(fopen('php://input', 'r'), $resource);
+        return $stream;
+    }
 
 
     /**
@@ -36,8 +86,9 @@ class Stream
      */
     public function __toString()
     {
-        fseek($this->stream, 0, SEEK_SET );
-
+        fseek($this->resource, 0, SEEK_SET);
+        $string=fread($this->resource, filesize($this->filename));
+        return $string;
     }
 
     /**
@@ -47,7 +98,10 @@ class Stream
      */
     public function close()
     {
-        fclose($this->stream);
+        if( $this->resource!==NULL )
+        {
+            fclose($this->resource);
+        }
     }
 
     /**
@@ -59,7 +113,10 @@ class Stream
      */
     public function detach()
     {
-
+        $oldResource=$this->resource;
+        fclose($this->resource);
+        $this->resource=NULL;
+        return $oldResource;
     }
 
     /**
@@ -69,7 +126,15 @@ class Stream
      */
     public function getSize()
     {
-
+        $stat=fstat($this->resource);
+        if( isset($stat['size']) )
+        {
+            return $stat['size'];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -80,7 +145,15 @@ class Stream
      */
     public function tell()
     {
-
+        $pos=ftell($this->resource);
+        if( $pos===FALSE )
+        {
+            throw new \RuntimeException("tell error");
+        }
+        else
+        {
+            return $pos;
+        }
     }
 
     /**
@@ -90,7 +163,8 @@ class Stream
      */
     public function eof()
     {
-
+        $eof=feof($this->resource);
+        return $eof;
     }
 
     /**
@@ -100,7 +174,8 @@ class Stream
      */
     public function isSeekable()
     {
-
+        $seekable=$this->getMetadata('seekable');
+        return $seekable;
     }
 
     /**
@@ -117,7 +192,11 @@ class Stream
      */
     public function seek($offset, $whence = SEEK_SET)
     {
-
+        $ret=fseek($this->resource, $offset, $whence);
+        if( $ret==-1 )
+        {
+            throw new \RuntimeException("seek error");
+        }
     }
 
     /**
@@ -132,7 +211,14 @@ class Stream
      */
     public function rewind()
     {
-
+        if( $this->isSeekable() )
+        {
+            $this->seek(0);
+        }
+        else
+        {
+            throw new \RuntimeException("rewind fail.");
+        }
     }
 
     /**
@@ -142,7 +228,15 @@ class Stream
      */
     public function isWritable()
     {
-
+        $mode=$this->getMetadata('mode');
+        if( in_array($mode , self::$modes['writable'] ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /**
@@ -154,7 +248,11 @@ class Stream
      */
     public function write($string)
     {
-
+        $ret=fwrite($this->resource, $string);
+        if( $ret===FALSE )
+        {
+            throw new \RuntimeException();
+        }
     }
 
     /**
@@ -164,7 +262,15 @@ class Stream
      */
     public function isReadable()
     {
-
+        $mode=$this->getMetadata('mode');
+        if( in_array($mode , self::$modes['readable'] ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /**
@@ -179,7 +285,12 @@ class Stream
      */
     public function read($length)
     {
-
+        $ret=fread($this->resource, $length);
+        if( $ret===FALSE )
+        {
+            throw new \RuntimeException('read file error');
+        }
+        return $ret;
     }
 
     /**
@@ -191,7 +302,14 @@ class Stream
      */
     public function getContents()
     {
-
+        if( $this->isReadable() )
+        {
+            $this->read($this->getSize());
+        }
+        else
+        {
+            throw new \RuntimeException("getContents error.");
+        }
     }
 
     /**
@@ -208,6 +326,18 @@ class Stream
      */
     public function getMetadata($key = null)
     {
-
+        $meta=stream_get_meta_data($this->resource);
+        if( $key===null )
+        {
+            return $meta;
+        }
+        else if( isset($meta[$key]))
+        {
+            return $meta[$key];
+        }
+        else
+        {
+            return null;
+        }
     }
 }

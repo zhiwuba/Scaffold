@@ -2,6 +2,7 @@
 
 namespace Scaffold\Http;
 
+use \Scaffold\Helper\Utility;
 
 /**
  * Representation of an incoming, server-side HTTP request.
@@ -44,6 +45,43 @@ namespace Scaffold\Http;
 class ServerRequest extends Request
 {
     /**
+    *  @var array $get $_GET
+    */
+    protected $get=[];
+
+    /**
+    *  @var array $post $_POST
+    */
+    protected $post=[];
+
+    /**
+    *  @var array $server $_SERVER
+    */
+    protected $server=[];
+
+    /**
+     *  @var array $cookie  $_COOKIE
+     */
+    protected $cookie=[];
+
+    /**
+     *  @var UploadedFile[] $uploadedFiles from $_FILES
+     */
+    protected $uploadedFiles=[];
+
+
+    public function __construct()
+    {
+        $this->normalizeGlobalFiles($_FILES);
+
+        $this->normalizeGlobalGet();
+
+        $uri=Uri::createFromEnv();
+        parent::__construct($uri);
+    }
+
+
+    /**
      * Retrieve server parameters.
      *
      * Retrieves data related to the incoming request environment,
@@ -54,7 +92,7 @@ class ServerRequest extends Request
      */
     public function getServerParams()
     {
-
+        return $this->server;
     }
 
     /**
@@ -69,7 +107,7 @@ class ServerRequest extends Request
      */
     public function getCookieParams()
     {
-
+        return $this->cookie;
     }
 
     /**
@@ -92,6 +130,7 @@ class ServerRequest extends Request
     public function withCookieParams(array $cookies)
     {
 
+        return $this;
     }
 
     /**
@@ -108,7 +147,8 @@ class ServerRequest extends Request
      */
     public function getQueryParams()
     {
-
+        $query=$this->getUri()->getQuery();
+        return $query;
     }
 
     /**
@@ -152,7 +192,7 @@ class ServerRequest extends Request
      */
     public function getUploadedFiles()
     {
-
+        return $this->uploadedFiles;
     }
 
     /**
@@ -168,7 +208,8 @@ class ServerRequest extends Request
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
-
+        array_merge_recursive($this->uploadedFiles, $uploadedFiles);
+        return $this;
     }
 
     /**
@@ -188,7 +229,10 @@ class ServerRequest extends Request
      */
     public function getParsedBody()
     {
+        if( $this->getHeaderLine() )
+        {
 
+        }
     }
 
     /**
@@ -237,7 +281,7 @@ class ServerRequest extends Request
      */
     public function getAttributes()
     {
-
+        return $this->attributes;
     }
 
     /**
@@ -257,7 +301,14 @@ class ServerRequest extends Request
      */
     public function getAttribute($name, $default = null)
     {
-
+        if( isset($this->attributes[$name]) )
+        {
+            return $this->attributes[$name];
+        }
+        else
+        {
+            return $default;
+        }
     }
 
     /**
@@ -277,7 +328,8 @@ class ServerRequest extends Request
      */
     public function withAttribute($name, $value)
     {
-
+        $this->attributes[$name]=$value;
+        return $this;
     }
 
     /**
@@ -296,6 +348,70 @@ class ServerRequest extends Request
      */
     public function withoutAttribute($name)
     {
+        unset($this->attributes[$name]);
+        return $this;
+    }
+
+    protected function normalizeGlobal()
+    {
 
     }
+
+    /**
+    *   $_FILES to array of UploadFile
+     * @param array $globalFiles
+     * @return void
+    */
+    protected function normalizeGlobalFiles($globalFiles)
+    {
+        $fileArray=[];
+
+        $this->rearrangeFiles($globalFiles, $fileArray);
+
+        $this->filesToObject($fileArray, $this->uploadedFiles);
+    }
+
+    protected function rearrangeFiles($filePropArray, &$fileArray )
+    {
+        foreach($filePropArray as $name=>$props)
+        {
+            if( is_array($props) && Utility::isNormalArray($props) )
+            {
+                isset($fileArray[$name])?: $fileArray[$name]=[];
+                foreach( $props as $key=>$val )
+                {
+                    $fileArray[$name][$key]=$val;
+                }
+            }
+            else if( is_array($props) )
+            {
+                isset($fileArray[$name])?: $fileArray[$name]=[];
+                $this->rearrangeFiles($props, $fileArray[$name]);
+            }
+            else
+            {
+                $fileArray[$name]=$props;
+            }
+        }
+    }
+
+    protected function filesToObject($fileArray, &$fileObjectArray)
+    {
+        foreach( $fileArray as $name=>$props )
+        {
+            if( Utility::isFlatArray($props) )
+            {
+                $uploadedFile=new UploadedFile($props['name'], $props['tmp_name'], $props['type'], $props['size'],$props['error'] );
+                $fileObjectArray=$uploadedFile;
+            }
+            else if( is_array($props) )
+            {
+                $fileObjectArray[$name]=[];
+                $this->filesToObject($props  , $fileObjectArray[$name]);
+            }
+        }
+    }
+
+
+
 }

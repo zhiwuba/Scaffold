@@ -18,6 +18,32 @@ class  UploadedFile
      */
     protected $stream;
 
+    protected $name=null;
+
+    protected $tmpName;
+
+    protected $type=null;
+
+    protected $size=null;
+
+    protected $error=0;
+
+    public function __construct($name, $tmpName, $type, $size, $error)
+    {
+        $this->name = $name;
+
+        $this->tmpName = $tmpName;
+
+        $this->type = $type;
+
+        $this->size = $size;
+
+        $this->error = $error;
+
+        $this->stream = Stream::createFromFile($name);
+    }
+
+
     /**
      * Retrieve a stream representing the uploaded file.
      *
@@ -36,7 +62,14 @@ class  UploadedFile
      */
     public function getStream()
     {
-        return $this->stream;
+        if( $this->stream instanceof Stream )
+        {
+            return $this->stream;
+        }
+        else
+        {
+            throw new \RuntimeException("no stream is available or can be created");
+        }
     }
 
     /**
@@ -73,7 +106,18 @@ class  UploadedFile
      */
     public function moveTo($targetPath)
     {
-
+        if( is_dir($targetPath) ) {
+            if (is_uploaded_file($this->tmpName)) {
+                if (!move_uploaded_file($this->tmpName, $targetPath)) {
+                    throw new \RuntimeException('error during move_uploaded_file');
+                }
+            } else {
+                rename($this->tmpName, $targetPath);
+            }
+        }
+        else {
+            throw new \InvalidArgumentException("$targetPath is invalid directory");
+        }
     }
 
     /**
@@ -87,7 +131,7 @@ class  UploadedFile
      */
     public function getSize()
     {
-
+        return $this->size;
     }
 
     /**
@@ -106,7 +150,12 @@ class  UploadedFile
      */
     public function getError()
     {
+        return $this->error;
+    }
 
+    public function getErrorMessage()
+    {
+        return $this->errorToMessage($this->error);
     }
 
     /**
@@ -124,7 +173,7 @@ class  UploadedFile
      */
     public function getClientFilename()
     {
-
+        return $this->name;
     }
 
     /**
@@ -142,6 +191,39 @@ class  UploadedFile
      */
     public function getClientMediaType()
     {
-
+        return $this->type;
     }
+
+    private function errorToMessage($code)
+    {
+        switch ($code) {
+            case UPLOAD_ERR_INI_SIZE:
+                $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini";
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $message = "The uploaded file was only partially uploaded";
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $message = "No file was uploaded";
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $message = "Missing a temporary folder";
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $message = "Failed to write file to disk";
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $message = "File upload stopped by extension";
+                break;
+
+            default:
+                $message = "Unknown upload error";
+                break;
+        }
+        return $message;
+    }
+
 }

@@ -20,11 +20,22 @@ namespace Scaffold\Http;
  * @link http://www.ietf.org/rfc/rfc7230.txt
  * @link http://www.ietf.org/rfc/rfc7231.txt
  */
-class Message
+abstract class Message
 {
+    /**
+    *  @var Array
+    */
     protected $headers;
+
+    /**
+    *  @var  Stream $body
+    */
     protected $body;
-    protected $version;
+
+    /**
+    *  @var string version.
+    */
+    protected $version='1.1';
 
     /**
      * Retrieves the HTTP protocol version as a string.
@@ -99,6 +110,7 @@ class Message
      */
     public function hasHeader($name)
     {
+        $name=strtolower($name);
         return array_key_exists($name, $this->headers);
     }
 
@@ -118,6 +130,7 @@ class Message
      */
     public function getHeader($name)
     {
+        $name=strtolower($name);
         if( isset($this->headers[$name]) ) {
             return $this->headers[$name];
         }else{
@@ -146,6 +159,7 @@ class Message
      */
     public function getHeaderLine($name)
     {
+        $name=strtolower($name);
         if( isset($this->headers[$name]) ) {
             $result=implode(',' , $this->headers[$name]);
         }
@@ -173,6 +187,7 @@ class Message
      */
     public function withHeader($name, $value)
     {
+        $name=strtolower($name);
         if( !empty($name) && (is_array($value) || is_string($value)) ){
             if( !isset($this->headers[$name]) ) {
                 $this->headers[$name]=[];
@@ -207,6 +222,7 @@ class Message
      */
     public function withAddedHeader($name, $value)
     {
+        $name=strtolower($name);
         if( !empty($name) && (is_array($value) || is_string($value)) ){
             if( !isset($this->headers[$name]) ) {
                 $this->headers[$name]=[];
@@ -233,6 +249,7 @@ class Message
      */
     public function withoutHeader($name)
     {
+        $name=strtolower($name);
         if( isset($this->headers[$name]) ) {
             unset($this->headers[$name]);
         }
@@ -246,9 +263,7 @@ class Message
      */
     public function getBody()
     {
-        $stream=new Stream();
-        $stream->write($this->body);
-        return $stream;
+        return $this->body;
     }
 
     /**
@@ -267,7 +282,7 @@ class Message
     public function withBody(Stream $body)
     {
         $instance=clone $this;
-        $instance->body=$body->getContents();
+        $instance->body=$body;
         return $instance;
     }
 }

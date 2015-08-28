@@ -23,22 +23,32 @@ namespace Scaffold\Http;
  */
 class Request extends Message
 {
-    const METHOD_HEAD = 'HEAD';
-    const METHOD_GET = 'GET';
-    const METHOD_POST = 'POST';
-    const METHOD_PUT = 'PUT';
+    const METHOD_HEAD   = 'HEAD';
+    const METHOD_GET      = 'GET';
+    const METHOD_POST    = 'POST';
+    const METHOD_PUT      = 'PUT';
     const METHOD_PATCH = 'PATCH';
     const METHOD_DELETE = 'DELETE';
     const METHOD_OPTIONS = 'OPTIONS';
     const METHOD_OVERRIDE = '_METHOD';
 
+
+    /**
+    * @var string $method
+     */
     protected $method;
+
+    /**
+    *  @var \Scaffold\Http\Uri $uri
+    */
     protected $uri;
 
     public function __construct($uri)
     {
         $this->method=$_SERVER['REQUEST_METHOD'];
         $this->uri=$uri;
+        http_get_request_headers();
+
     }
 
     /**
@@ -91,7 +101,7 @@ class Request extends Message
      */
     public function getMethod()
     {
-
+        return $this->method;
     }
 
     /**
@@ -111,7 +121,15 @@ class Request extends Message
      */
     public function withMethod($method)
     {
-
+        if( defined("self::METHOD_$method") )
+        {
+            $this->method=$method;
+            return $this;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid method");
+        }
     }
 
     /**
@@ -160,6 +178,7 @@ class Request extends Message
      */
     public function withUri(Uri $uri, $preserveHost = false)
     {
-
+        //TODO
+        return $this;
     }
 }

@@ -6,8 +6,9 @@
  * Time: 下午2:33
  */
 
+use \Scaffold\Database\Model\Query;
 
-class MongoQuery extends \Scaffold\Database\Model\Query
+class MongoQuery extends Query
 {
 
 }

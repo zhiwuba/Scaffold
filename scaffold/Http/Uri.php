@@ -67,6 +67,30 @@ class Uri
         }
     }
 
+    public static function createFromEnv()
+    {
+        if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO']))
+            $scheme=$_SERVER['HTTP_X_FORWARDED_PROTO'];
+        else
+            $scheme=empty($_SERVER['HTTPS']) ? "https" : "http";
+
+        $host='';
+        if( !empty($_SERVER['HTTP_X_FORWARDED_SERVER']) )
+            $host=$_SERVER['HTTP_X_FORWARDED_SERVER'];
+        else if( !empty($_SERVER['SERVER_NAME']) )
+            $host=$_SERVER['SERVER_NAME'];
+        else if( !empty($_SERVER['SERVER_HOST']) )
+            $host=$_SERVER['SERVER_HOST'];
+
+        $port=isset($_SERVER['SERVER_PORT'])? $_SERVER['SERVER_PORT'] : null;
+        $user=isset($_SERVER['PHP_AUTH_USER'])? $_SERVER['PHP_AUTH_USER'] : '';
+        $pass=isset($_SERVER['PHP_AUTH_PW'])? $_SERVER['PHP_AUTH_PW'] : '';
+        $path=isset($_SERVER['PATH_INFO'])?  $_SERVER['PATH_INFO'] : '';
+        $query=isset($_SERVER['QUERY_STRING'])? $_SERVER['QUERY_STRING'] : '';
+
+        return new Uri($scheme, $host, $port, $user, $pass, $path, $query, '');
+    }
+
 
     /**
      * Retrieve the scheme component of the URI.
@@ -499,6 +523,26 @@ class Uri
      */
     public function __toString()
     {
-        return  $this->scheme . ':' . $this->authority . '/' . $this->path . '?' . $this->query . '#' . $this->fragment;
+        if( !empty($this->scheme) )
+            $url = $this->scheme . ':';
+        else
+            $url= "//";
+
+        $authority=$this->getAuthority();
+        if( !empty($authority) )
+            $url= $url . $authority;
+
+        if( !empty($this->path) ) {
+            $url=$url . '/' . ltrim($this->path, '/');
+        }
+
+        if( !empty($this->query) ){
+            $url=$url . '?' . $this->query;
+        }
+
+        if( !empty($this->fragment) ){
+            $url=$url . '#'. $this->fragment;
+        }
+        return $url;
     }
 }

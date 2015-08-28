@@ -26,7 +26,7 @@ class Application
         $this->container=new Container();
 
         $this->container->singleton('request', function(){
-            $uri=new \Scaffold\Http\Uri('');
+            $uri=\Scaffold\Http\Uri::createFromEnv();
             return new \Scaffold\Http\Request($uri);
         });
 
