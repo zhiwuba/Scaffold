@@ -13,10 +13,8 @@ require_once '../vendor/autoload.php';
 
 define('ROOT_PATH', dirname(__DIR__));
 
-
 $app=new Scaffold\Application\Application();
 
 $app->sourceRouteFile(ROOT_PATH . 'app/route.php');
 
 $app->run();
-

@@ -14,22 +14,22 @@ class MysqlQuery extends Query
      */
     public function count()
     {
-        // TODO: Implement count() method.
+
     }
 
     public function max()
     {
-        // TODO: Implement max() method.
+
     }
 
     public function min()
     {
-        // TODO: Implement min() method.
+
     }
 
     public function sum()
     {
-        // TODO: Implement sum() method.
+
     }
 
 }

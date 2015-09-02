@@ -281,8 +281,14 @@ abstract class Message
      */
     public function withBody(Stream $body)
     {
-        $instance=clone $this;
-        $instance->body=$body;
-        return $instance;
+        if( $body!==NULL )
+        {
+            $this->body=$body;
+            return $this;
+        }
+        else
+        {
+            throw new \InvalidArgumentException('invalid body');
+        }
     }
 }

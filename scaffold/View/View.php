@@ -8,7 +8,9 @@
 
 namespace Scaffold\View;
 
-use Scaffold\Http;
+use Scaffold\Application\Application;
+use Scaffold\Http\Stream;
+
 
 class View
 {
@@ -17,8 +19,22 @@ class View
     */
     protected $app;
 
+    /**
+    *  @var  Array
+    */
+    protected $data=[];
 
-    protected $data;
+
+    public function getApplication()
+    {
+        return $this->app;
+    }
+
+    public function setApplication(Application $app)
+    {
+        $this->app=$app;
+    }
+
 
     /**
     *  append data
@@ -30,17 +46,19 @@ class View
 
     /**
     *   render template.
+     * @param string $template
+     * @param Array  $data
     */
     public function render($template, array $data)
     {
         $this->appendData($data);
 
         ob_start();
-        extract($this->data);  //overwrite.
+        extract($this->data);
         require $template;
         $content=ob_get_clean();
 
-        $stream=new Http\Stream();
+        $stream= Stream::createFromMemory();
         $stream->write($content);
 
         $this->app->response->withBody($stream);

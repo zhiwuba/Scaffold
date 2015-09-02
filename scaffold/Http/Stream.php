@@ -30,6 +30,11 @@ class Stream
         $this->resource=$resource;
     }
 
+    public function __destruct()
+    {
+        $this->close();
+    }
+
     /**
      * create from file for UploadedFile.
     * @param string $filename
@@ -48,12 +53,12 @@ class Stream
     }
 
     /**
-    *  create from temp for response
+    *  create from memory
      * @return Stream
     */
-    public static function createFromTemp()
+    public static function createFromMemory()
     {
-        $resource=fopen('php://temp', 'r+');
+        $resource=fopen('php://memory', 'r+');
         $stream=new Stream($resource);
         return $stream;
     }
@@ -64,7 +69,7 @@ class Stream
     */
     public static function createFromInput()
     {
-        $resource=fopen('php://input',  'w+');
+        $resource=fopen('php://temp',  'w+');
         $stream=stream_copy_to_stream(fopen('php://input', 'r'), $resource);
         return $stream;
     }
@@ -340,4 +345,5 @@ class Stream
             return null;
         }
     }
+
 }

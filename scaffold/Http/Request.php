@@ -47,8 +47,8 @@ class Request extends Message
     {
         $this->method=$_SERVER['REQUEST_METHOD'];
         $this->uri=$uri;
-        http_get_request_headers();
-
+        $this->withBody(Stream::createFromInput());
+        $this->normalizeRequestHeader($_SERVER);
     }
 
     /**
@@ -178,7 +178,35 @@ class Request extends Message
      */
     public function withUri(Uri $uri, $preserveHost = false)
     {
-        //TODO
+
         return $this;
+    }
+
+
+    /**
+     *  $_SERVER to array of request header.
+     * @param array $server
+     * @return void
+     */
+    protected function normalizeRequestHeader($server)
+    {
+        foreach( $server as $key=>$value )
+        {
+            $ret=preg_match('/^HTTP_/', $key);
+            if( $ret==1 )
+            {
+                $parts=explode('_' , $key);
+                array_shift($parts);
+                if( count($parts)>0 )
+                {
+                    foreach($parts as &$part)
+                    {
+                        $part=ucfirst($part);
+                    }
+                    $head=implode('-', $parts);
+                    $this->withHeader($head, $value);
+                }
+            }
+        }
     }
 }

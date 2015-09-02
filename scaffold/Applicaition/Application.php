@@ -9,11 +9,18 @@
 namespace Scaffold\Application;
 
 use Scaffold\Helper\Container;
+use Scaffold\Http\Response;
+use Scaffold\Http\ServerRequest;
+use Scaffold\Log\Logger;
+use Scaffold\Routing\Router;
+use Scaffold\Session\Session;
+use Scaffold\View\View;
+
 
 /**
  *  Application
  * @property \Scaffold\Routing\Router $router
-*  @property  \Scaffold\Http\Request $request
+*  @property  \Scaffold\Http\ServerRequest $request
  * @property  \Scaffold\Http\Response $response
  * @property  \Scaffold\Log\Logger    $logger
  */
@@ -26,34 +33,28 @@ class Application
         $this->container=new Container();
 
         $this->container->singleton('request', function(){
-            $uri=\Scaffold\Http\Uri::createFromEnv();
-            return new \Scaffold\Http\Request($uri);
+            return new ServerRequest();
         });
 
         $this->container->singleton('response', function(){
-           return new \Scaffold\Http\Response();
+           return new Response();
         });
 
         $this->container->singleton('logger', function(){
-            return new \Scaffold\Log\Logger();
+            return new Logger();
         });
 
         $this->container->singleton('router', function(){
-            return new \Scaffold\Routing\Router();
-        });
-
-        $this->container->singleton('cookie', function(){
-           return new \Scaffold\Http\Cookie();
+            return new Router();
         });
 
         $this->container->singleton('session', function(){
-            return new \Scaffold\Session\Session();
+            return new Session();
         });
 
         $this->container->singleton('view', function(){
-            return new \Scaffold\View\View();
+            return new View();
         });
-
     }
 
     public function __get($name)
@@ -76,11 +77,26 @@ class Application
         $this->container->remove($name);
     }
 
+    /**
+    *  include route file.
+     * @param  string $filePath
+    */
     public function sourceRouteFile($filePath)
     {
         require_once "$filePath";
     }
 
+    /**
+    *  dispatch request by router
+    */
+    public function dispatch()
+    {
+        $this->router->dispatch($this->request );
+    }
+
+    /**
+    *  send header
+    */
     public function sendHeader()
     {
         if( headers_sent() === false ){
@@ -93,19 +109,29 @@ class Application
         }
     }
 
+    /**
+    *  send body
+    */
     public function sendBody()
     {
         echo $this->response->getBody();
     }
 
+    /**
+    *  run , active all process.
+    */
     public function  run()
     {
         try
         {
-            $this->router->dispatch($this->request->getUri(), $this->request->getMethod() );
-
+            $this->dispatch();
             $this->sendHeader();
             $this->sendBody();
+
+            if (function_exists("fastcgi_finish_request")) {
+                fastcgi_finish_request();
+            }
+
         }
         catch(\Exception $e)
         {

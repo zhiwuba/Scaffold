@@ -64,6 +64,17 @@ class ServerRequest extends Request
      */
     protected $cookie=[];
 
+
+    /**
+    *  @var array $attributes
+    */
+    protected $attributes;
+
+    /**
+    *  @var array|object $parsedBody
+    */
+    protected $parsedBody;
+
     /**
      *  @var UploadedFile[] $uploadedFiles from $_FILES
      */
@@ -72,9 +83,12 @@ class ServerRequest extends Request
 
     public function __construct()
     {
-        $this->normalizeGlobalFiles($_FILES);
+        $this->get=$_GET;
+        $this->post=$_POST;
+        $this->server=$_SERVER;
+        $this->cookie=$_COOKIE;
 
-        $this->normalizeGlobalGet();
+        $this->normalizeGlobalFiles($_FILES);
 
         $uri=Uri::createFromEnv();
         parent::__construct($uri);
@@ -129,7 +143,7 @@ class ServerRequest extends Request
      */
     public function withCookieParams(array $cookies)
     {
-
+        array_merge($this->cookie, $cookies);
         return $this;
     }
 
@@ -147,8 +161,13 @@ class ServerRequest extends Request
      */
     public function getQueryParams()
     {
-        $query=$this->getUri()->getQuery();
-        return $query;
+        if( !$this->get )
+        {
+            $query=$this->getUri()->getQuery();
+            parse_str($query, $this->get);
+        }
+
+        return $this->get;
     }
 
     /**
@@ -175,7 +194,8 @@ class ServerRequest extends Request
      */
     public function withQueryParams(array $query)
     {
-
+        array_merge($this->get, $query);
+        return $this;
     }
 
     /**
@@ -229,10 +249,28 @@ class ServerRequest extends Request
      */
     public function getParsedBody()
     {
-        if( $this->getHeaderLine() )
+        if( $this->parsedBody )
         {
-
+            return $this->parsedBody;
         }
+
+        $contentType=$this->getHeader('Content-Type');
+        if(in_array( $contentType , ['application/x-www-form-urlencoded', 'multipart/form-data']))
+        {
+            $this->parsedBody=$this->post;
+        }
+        else if( $contentType == 'application/json' )
+        {
+            $this->parsedBody=json_decode((string)$this->getBody(), true);
+        }
+        else if( $contentType == 'application/xml' )
+        {
+            $this->parsedBody=json_decode(
+                json_encode((array)simplexml_load_string((string)$this->getBody())),
+                true
+            );
+        }
+        return $this->parsedBody;
     }
 
     /**
@@ -265,7 +303,12 @@ class ServerRequest extends Request
      */
     public function withParsedBody($data)
     {
+        if (!is_null($data) && !is_object($data) && !is_array($data)) {
+            throw new \InvalidArgumentException('Parsed body value must be an array, an object, or null');
+        }
 
+        $this->parsedBody = $data;
+        return $this;
     }
 
     /**
@@ -350,11 +393,6 @@ class ServerRequest extends Request
     {
         unset($this->attributes[$name]);
         return $this;
-    }
-
-    protected function normalizeGlobal()
-    {
-
     }
 
     /**

@@ -8,7 +8,6 @@
 
 namespace Scaffold\Routing;
 
-use \Scaffold\Http\Uri;
 
 class Route
 {
@@ -119,7 +118,7 @@ class Route
         }
         else if(is_array($this->callback))
         {
-
+            //TODO
         }
         else if( is_callable($this->callback) )
         {   //function or closure

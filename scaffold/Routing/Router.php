@@ -8,15 +8,14 @@
 
 namespace Scaffold\Routing;
 use Scaffold\Http\Request;
+use \Scaffold\Http\ServerRequest;
 
 class Router
 {
-    protected $routes;
-
-    public function __construct()
-    {
-
-    }
+    /**
+    *  @var \Scaffold\Routing\Route[]
+    */
+    protected static $routes;
 
     public static function get()
     {
@@ -48,22 +47,22 @@ class Router
         self::addRoute($args)->via("ANY");
     }
 
-    protected function addRoute($args)
+    protected static function addRoute($args)
     {
         $pattern=array_shift($args);
         $callback=array_pop($args);
         $route=new Route($pattern, $callback);
-        $this->routes[]=$route;
+        self::$routes[]=$route;
         return $route;
     }
 
     /**
-    * @return array Scaffold\Routing\Route
+    * @return \Scaffold\Routing\Route[]
      */
     public function findRoute($uri, $method)
     {
         $routes=[];
-        foreach($this->routes as $route)
+        foreach(self::$routes as $route)
         {
             if($route->matchPattern($uri) && $route->supportMethod($method))
             {
@@ -73,15 +72,20 @@ class Router
         return $routes;
     }
 
-    public function dispatch($uri, $method)
+    /**
+    *  dispatch request by router.
+     * @param $request ServerRequest
+    */
+    public function dispatch(ServerRequest &$request)
     {
+        $uri = $request->getUri();
+        $method = $request->getMethod();
         $routes=$this->findRoute($uri, $method );
         foreach($routes as $route)
         {
             $route->dispatch();
         }
     }
-
 
 }
 
