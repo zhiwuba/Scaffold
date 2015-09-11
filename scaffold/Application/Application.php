@@ -41,7 +41,8 @@ class Application
         });
 
         $this->container->singleton('logger', function(){
-            return new Logger();
+            $logger=Logger::createFileLogger("default");
+            return $logger;
         });
 
         $this->container->singleton('router', function(){
