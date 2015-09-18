@@ -12,7 +12,7 @@ class Utility
 {
 
     /**
-    * whether array is normal(assoc) array or not.
+    * whether array is normal(assoc)  or not.
     * @param Array $array
     * @return bool
     */
@@ -23,7 +23,7 @@ class Utility
 
 
     /**
-     * whether array is flat array or not.
+     * whether array is flat or not.
     * @param Array $array
      * @return bool
      */

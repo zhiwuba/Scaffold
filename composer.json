@@ -5,7 +5,11 @@
   "autoload":{
     "psr-4":{
       "Scaffold\\" : "scaffold/"
-    }
+    },
+    "classmap": [
+       "app/Controllers",
+       "app/Models"
+     ]
   }
 
 }

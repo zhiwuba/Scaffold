@@ -6,27 +6,25 @@
  * Time: 0:48
  */
 
+use Scaffold\Controller\Controller;
 
 class MainController extends Controller
 {
-    public function _before()
+    public function getList($id)
     {
+        $validator=Validator::make($_POST, [
+            'id'=>'required|number',
+            'name'=>'required|string',
+            'email'=>'required|email',
+            'password'=>'required|password'
+        ]);
 
-    }
+        if( $validator->fails() )
+        {
+            echo $validator->messages();
+        }
 
-    public function getList()
-    {
-
-    }
-
-    public function deleteItem()
-    {
-
-    }
-
-    public function updateItem()
-    {
-
+        echo $id . "\n";
     }
 
 }

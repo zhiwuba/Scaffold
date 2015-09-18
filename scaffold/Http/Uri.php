@@ -72,7 +72,7 @@ class Uri
         if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO']))
             $scheme=$_SERVER['HTTP_X_FORWARDED_PROTO'];
         else
-            $scheme=empty($_SERVER['HTTPS']) ? "https" : "http";
+            $scheme=empty($_SERVER['HTTPS']) ? "http" : "https";
 
         $host='';
         if( !empty($_SERVER['HTTP_X_FORWARDED_SERVER']) )
@@ -85,10 +85,35 @@ class Uri
         $port=isset($_SERVER['SERVER_PORT'])? $_SERVER['SERVER_PORT'] : null;
         $user=isset($_SERVER['PHP_AUTH_USER'])? $_SERVER['PHP_AUTH_USER'] : '';
         $pass=isset($_SERVER['PHP_AUTH_PW'])? $_SERVER['PHP_AUTH_PW'] : '';
-        $path=isset($_SERVER['PATH_INFO'])?  $_SERVER['PATH_INFO'] : '';
-        $query=isset($_SERVER['QUERY_STRING'])? $_SERVER['QUERY_STRING'] : '';
+
+        list($path, $query)=Uri::parseRequestUri();
 
         return new Uri($scheme, $host, $port, $user, $pass, $path, $query, '');
+    }
+
+    public static function parseRequestUri()
+    {
+        $path='';
+        $query='';
+        if( isset($_SERVER['REQUEST_URI']) )
+        {
+            $uri=$_SERVER['REQUEST_URI'];
+            if( strncmp($uri, '/', 1)==0 )
+            {
+                $uri=substr($uri, 1);
+            }
+            $pos=strpos($uri, '?');
+            if( $pos===FALSE )
+            {
+                $path=$uri;
+            }
+            else
+            {
+                $path=substr($uri, 0, $pos);
+                $query=substr($uri, $pos+1);
+            }
+        }
+        return array($path, $query);
     }
 
 
@@ -132,16 +157,16 @@ class Uri
     public function getAuthority()
     {
         $authority="";
-        if( isset($this->username) ){
+        if( !empty($this->username) ){
             $authority=$this->username;
-            if( isset($this->password) ){
+            if( !empty($this->password) ){
                 $authority .= ":{$this->password}@";
             }
         }
 
         $authority .= $this->host;
 
-        if( isset($this->port) ){
+        if( !empty($this->port) ){
             $authority="$authority:{$this->port}";
         }
 
@@ -166,9 +191,9 @@ class Uri
     public function getUserInfo()
     {
         $userInfo="";
-        if( isset($this->username) ){
+        if( !empty($this->username) ){
             $userInfo=$this->username;
-            if( isset($this->password) ){
+            if( !empty($this->password) ){
                 $userInfo .= ":{$this->password}";
             }
         }
@@ -337,7 +362,7 @@ class Uri
     public function withUserInfo($user, $password = null)
     {
         $instance=clone $this;
-        if( isset($password) )
+        if( !empty($password) )
         {
             $instance->userInfo="$user:$password";
         }

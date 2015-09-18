@@ -70,7 +70,8 @@ class Stream
     public static function createFromInput()
     {
         $resource=fopen('php://temp',  'w+');
-        $stream=stream_copy_to_stream(fopen('php://input', 'r'), $resource);
+        stream_copy_to_stream(fopen('php://input', 'r'), $resource);
+        $stream=new Stream($resource);
         return $stream;
     }
 

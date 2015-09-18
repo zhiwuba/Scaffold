@@ -8,15 +8,29 @@
 
 namespace Scaffold\Routing;
 use Scaffold\Http\Request;
-use \Scaffold\Http\ServerRequest;
+use Scaffold\Http\ServerRequest;
+use Scaffold\Application\AppTrait;
 
 class Router
 {
+    use AppTrait;
+
     /**
     *  @var \Scaffold\Routing\Route[]
     */
     protected static $routes;
 
+    /**
+    *  construct.
+    */
+    public function __construct($app)
+    {
+        $this->setApplication($app);
+    }
+
+    /**
+    *  get
+    */
     public static function get()
     {
         $args=func_get_args();
@@ -80,7 +94,7 @@ class Router
     {
         $uri = $request->getUri();
         $method = $request->getMethod();
-        $routes=$this->findRoute($uri, $method );
+        $routes=$this->findRoute($uri->getPath(), $method );
         foreach($routes as $route)
         {
             $route->dispatch();

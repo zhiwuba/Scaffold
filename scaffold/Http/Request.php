@@ -45,7 +45,7 @@ class Request extends Message
 
     public function __construct($uri)
     {
-        $this->method=$_SERVER['REQUEST_METHOD'];
+        $this->method=isset($_SERVER['REQUEST_METHOD'])? $_SERVER['REQUEST_METHOD']: 'GET';
         $this->uri=$uri;
         $this->withBody(Stream::createFromInput());
         $this->normalizeRequestHeader($_SERVER);

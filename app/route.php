@@ -12,9 +12,9 @@ Router::get("test",  function(){
     echo "Hello World";
 });
 
-Router::get("to/:id", function($id){
+Router::get("hello/:id", function($id){
     echo "Hello to $id";
 });
 
-Router::get("tell/:name",  "MainController@tell");
+Router::get("list/:id",  "MainController@getList");
 

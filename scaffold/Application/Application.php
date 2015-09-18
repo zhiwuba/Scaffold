@@ -26,6 +26,9 @@ use Scaffold\View\View;
  */
 class Application
 {
+    /**
+    *  @var Container
+    */
     protected $container;
 
     public function __construct()
@@ -41,12 +44,13 @@ class Application
         });
 
         $this->container->singleton('logger', function(){
-            $logger=Logger::createFileLogger("default");
+            $logFile=ROOT_PATH . '/log/default.log';
+            $logger=Logger::createFileLogger($logFile);
             return $logger;
         });
 
         $this->container->singleton('router', function(){
-            return new Router();
+            return new Router($this);
         });
 
         $this->container->singleton('session', function(){
@@ -92,7 +96,10 @@ class Application
     */
     public function dispatch()
     {
-        $this->router->dispatch($this->request );
+        if( $this->request!==null )
+        {
+            $this->router->dispatch($this->request );
+        }
     }
 
     /**

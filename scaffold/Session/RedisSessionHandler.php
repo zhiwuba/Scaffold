@@ -20,7 +20,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function close()
     {
-        // TODO: Implement close() method.
+
     }
 
     /**
@@ -35,7 +35,6 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        // TODO: Implement destroy() method.
     }
 
     /**
@@ -53,7 +52,6 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function gc($maxlifetime)
     {
-        // TODO: Implement gc() method.
     }
 
     /**
@@ -69,7 +67,6 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function open($save_path, $session_id)
     {
-        // TODO: Implement open() method.
     }
 
     /**
@@ -85,7 +82,6 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function read($session_id)
     {
-        // TODO: Implement read() method.
     }
 
     /**
@@ -107,7 +103,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
-        // TODO: Implement write() method.
+
     }
 
 }

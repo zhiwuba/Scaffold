@@ -14,19 +14,16 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
     *  set instance.
+     * @param string $key
+     * @param \Closure $closure
     */
-    public function singleton($key, $value )
+    public function singleton($key, \Closure $closure )
     {
-        $this->set($key, function ($param) use ($value) {
-            static $object;
-
-            if( null === $object ){
-                $object=$value($param);
-            }
-            return $object;
-        });
+        if( !$this->has($key) )
+        {
+            $this->set($key,  $closure());
+        }
     }
-
 
     /**
     *   interface implements.
@@ -61,9 +58,8 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
         return count($this->data);
     }
 
-
     /**
-    *  function
+    *  function get
     */
     public function get( $key, $default=null )
     {

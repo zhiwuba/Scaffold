@@ -8,21 +8,20 @@
 
 namespace Scaffold\Routing;
 
-
 class Route
 {
     protected $pattern;
     protected $callback;
     protected $regex;
 
-    protected $method;
-    protected $params;
+    protected $method=[];
+    protected $params=[];
 
 
     public function __construct($pattern, $callback)
     {
-        $this->pattern=$pattern;
-        $this->callback=$callback;
+        $this->setPattern($pattern);
+        $this->setCallback($callback);
     }
 
     /**
@@ -31,12 +30,12 @@ class Route
     public function via()
     {
         $args=func_get_args();
-        array_merge($this->method, $args);
+        $this->method=array_merge($this->method, $args);
     }
 
     public function supportMethod($method)
     {
-        $isSupport=in_array($method, $this->$method);
+        $isSupport=in_array($method, $this->method);
         return $isSupport;
     }
 
@@ -48,9 +47,30 @@ class Route
         return $this->params;
     }
 
-    public function setParams($params)
+    public function setParams(array $params)
     {
         $this->params=array_merge($params, $this->params);
+    }
+
+    /**
+    *  get or set callback
+    */
+
+    public function getCallback()
+    {
+        return $this->callback;
+    }
+
+    public function setCallback($callback)
+    {
+        if( is_string($callback) || is_callable($callback) )
+        {
+            $this->callback=$callback;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("invalid callback.");
+        }
     }
 
     /**
@@ -73,7 +93,7 @@ class Route
             if( strpos($segment, ':')===0 )
             {
                 $name=substr($segment,1);
-                $parts[]="(<?name=$name>\\w+)";
+                $parts[]="(?P<$name>\\w+)";
             }
             else
             {
@@ -82,7 +102,7 @@ class Route
         }
 
         $this->pattern=$pattern;
-        $this->regex='/^' . implode('/', $parts)  .  '$/';;
+        $this->regex='#' . implode('/', $parts)  .  '#';
     }
 
     public function matchPattern($uri)
@@ -90,7 +110,13 @@ class Route
         $isMatch=preg_match($this->regex, $uri, $matches);
         if( $isMatch)
         {
-            $this->params=$matches;
+            foreach($matches as $key=>$value )
+            {
+                if( !empty($key) && is_string($key) )
+                {
+                    $this->params[$key]=$value;
+                }
+            }
             return true;
         }
         else
@@ -98,7 +124,6 @@ class Route
             return false;
         }
     }
-
 
     public function dispatch()
     {

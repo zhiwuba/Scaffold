@@ -1,6 +1,6 @@
 <?php
 
-namespace Psr\Log;
+namespace Scaffold\Log;
 
 /**
  * Describes log levels.
@@ -15,4 +15,5 @@ class LogLevel
     const NOTICE    = 'notice';
     const INFO      = 'info';
     const DEBUG     = 'debug';
+
 }

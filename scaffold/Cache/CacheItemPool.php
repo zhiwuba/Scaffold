@@ -7,12 +7,12 @@
  */
 
 
-namespace Psr\Cache;
+namespace Scaffold\Cache;
 
 /**
- * \Psr\Cache\CacheItemPoolInterface generates Cache\CacheItem objects.
+ * \Scaffold\Cache\CacheItemPool generates Cache\CacheItem objects.
  */
-interface CacheItemPoolInterface
+class CacheItemPool
 {
 
     /**
@@ -23,13 +23,16 @@ interface CacheItemPoolInterface
      *
      * @param string $key
      *   The key for which to return the corresponding Cache Item.
-     * @return \Psr\Cache\CacheItemInterface
+     * @return \Scaffold\Cache\CacheItem
      *   The corresponding Cache Item.
-     * @throws \Psr\Cache\InvalidArgumentException
-     *   If the $key string is not a legal value a \Psr\Cache\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     *   If the $key string is not a legal value a \InvalidArgumentException
      *   MUST be thrown.
      */
-    public function getItem($key);
+    public function getItem($key)
+    {
+
+    }
 
     /**
      * Returns a traversable set of cache items.
@@ -42,7 +45,10 @@ interface CacheItemPoolInterface
      * key is not found. However, if no keys are specified then an empty
      * traversable MUST be returned instead.
      */
-    public function getItems(array $keys = array());
+    public function getItems(array $keys = array())
+    {
+
+    }
 
     /**
      * Deletes all items in the pool.
@@ -50,7 +56,10 @@ interface CacheItemPoolInterface
      * @return boolean
      *   True if the pool was successfully cleared. False if there was an error.
      */
-    public function clear();
+    public function clear()
+    {
+
+    }
 
     /**
      * Removes multiple items from the pool.
@@ -60,28 +69,37 @@ interface CacheItemPoolInterface
      * @return static
      * The invoked object.
      */
-    public function deleteItems(array $keys);
+    public function deleteItems(array $keys)
+    {
+
+    }
 
     /**
      * Persists a cache item immediately.
      *
-     * @param CacheItemInterface $item
+     * @param CacheItem $item
      *   The cache item to save.
      *
      * @return static
      *   The invoked object.
      */
-    public function save(CacheItemInterface $item);
+    public function save(CacheItem $item)
+    {
+
+    }
 
     /**
      * Sets a cache item to be persisted later.
      *
-     * @param CacheItemInterface $item
+     * @param CacheItem $item
      *   The cache item to save.
      * @return static
      *   The invoked object.
      */
-    public function saveDeferred(CacheItemInterface $item);
+    public function saveDeferred(CacheItem $item)
+    {
+
+    }
 
     /**
      * Persists any deferred cache items.
@@ -89,6 +107,9 @@ interface CacheItemPoolInterface
      * @return bool
      *   TRUE if all not-yet-saved items were successfully saved. FALSE otherwise.
      */
-    public function commit();
+    public function commit()
+    {
+
+    }
 
 }

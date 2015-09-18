@@ -25,7 +25,7 @@ abstract class Message
     /**
     *  @var Array
     */
-    protected $headers;
+    protected $headers=[];
 
     /**
     *  @var  Stream $body

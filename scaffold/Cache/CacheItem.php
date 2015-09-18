@@ -7,12 +7,12 @@
  */
 
 
-namespace Psr\Cache;
+namespace Scaffold\Cache;
 
 /**
  * CacheItemInterface defines an interface for interacting with objects inside a cache.
  */
-interface CacheItemInterface
+class CacheItem
 {
     /**
      * Returns the key for the current cache item.
@@ -23,7 +23,10 @@ interface CacheItemInterface
      * @return string
      *   The key string for this cache item.
      */
-    public function getKey();
+    public function getKey()
+    {
+
+    }
 
     /**
      * Retrieves the value of the item from the cache associated with this objects key.
@@ -37,7 +40,10 @@ interface CacheItemInterface
      * @return mixed
      *   The value corresponding to this cache item's key, or null if not found.
      */
-    public function get();
+    public function get()
+    {
+
+    }
 
     /**
      * Sets the value represented by this cache item.
@@ -64,7 +70,10 @@ interface CacheItemInterface
      * @return static
      *   The invoked object.
      */
-    public function set($value, $ttl = null);
+    public function set($value, $ttl = null)
+    {
+
+    }
 
     /**
      * Confirms if the cache item lookup resulted in a cache hit.
@@ -75,7 +84,10 @@ interface CacheItemInterface
      * @return boolean
      *   True if the request resulted in a cache hit.  False otherwise.
      */
-    public function isHit();
+    public function isHit()
+    {
+
+    }
 
     /**
      * Confirms if the cache item exists in the cache.
@@ -87,7 +99,10 @@ interface CacheItemInterface
      * @return boolean
      *  True if item exists in the cache, false otherwise.
      */
-    public function exists();
+    public function exists()
+    {
+
+    }
 
     /**
      * Sets the expiration for this cache item.
@@ -104,7 +119,10 @@ interface CacheItemInterface
      * @return static
      *   The called object.
      */
-    public function setExpiration($ttl = null);
+    public function setExpiration($ttl = null)
+    {
+
+    }
 
     /**
      * Returns the expiration time of a not-yet-expired cache item.
@@ -115,5 +133,8 @@ interface CacheItemInterface
      * @return \DateTime
      *   The timestamp at which this cache item will expire.
      */
-    public function getExpiration();
+    public function getExpiration()
+    {
+
+    }
 }
