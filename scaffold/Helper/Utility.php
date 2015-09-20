@@ -12,31 +12,29 @@ class Utility
 {
 
     /**
-    * whether array is normal(assoc)  or not.
+    * whether array is normal or not.
+     * ['a', 'b', 'c', 'd']
     * @param Array $array
     * @return bool
     */
     public static function isNormalArray(&$array)
     {
-        return array_keys($array)===range(0, count($array)- 1);
+        return is_array($array) && (array_keys($array)===range(0, count($array)- 1));
     }
 
 
     /**
-     * whether array is flat or not.
-    * @param Array $array
+    * whether array is assoc or not.
+     * @param Array $array
      * @return bool
      */
-    public static function isFlatArray(&$array)
+    public static function isAssocArray(&$array)
     {
-        foreach( $array as $key=>$value )
-        {
-            if( is_array($value) ){
-                return false;
-            }
-        }
-        return true;
+        return is_array($array) && array_diff_key($array, array_keys(array_keys($array)));
     }
+
+
+
 
 }
 

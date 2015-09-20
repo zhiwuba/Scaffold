@@ -6,22 +6,50 @@
  * Time: 下午3:08
  */
 
-namespace Scaffold\Database\Model;
+namespace Scaffold\Database\Query;
+
+use Scaffold\Helper\Utility;
 
 abstract class Query
 {
-    const SORT_ASC='asc';
-    const SORT_DESC='desc';
+    protected static $sortOrder=[
+        SORT_ASC=>'asc',
+        SORT_DESC=>'desc'
+    ];
 
     protected $scenario;
+
+    protected $table;
+
     protected $selects=[];
+
+    /**
+     * @var array
+     *                 tree
+     *                 and
+     *             /          \
+     *          or           and
+     *        /    \          /   \
+     *     a=b  c=d   e=f   or
+     *                             /   \
+     *                       m=n  p=q
+     */
     protected $wheres=[];
+
     protected $orders=[];
+
     protected $groups=[];
+
     protected $skip=0;
+
     protected $take=0;
 
-    protected $join;
+    protected $data=[];
+
+    public function __construct($tableName)
+    {
+        $this->table=$tableName;
+    }
 
     /**
     *  CRUD
@@ -49,107 +77,132 @@ abstract class Query
     }
 
     /**
+     *  update set
+     * @usage: set(a, b)  set([a=>b, c=>d])
+     */
+    public function set()
+    {
+        $args=func_get_args();
+        if ( Utility::isNormalArray($args) && count($args)==2 )
+        {
+            $this->data[$args[0]]=$args[1];
+        }
+        else if( Utility::isAssocArray($args) )
+        {
+            $this->data=array_merge($this->data, $args);
+        }
+        else
+        {
+            throw new \Exception("unsupported arguments");
+        }
+        return $this;
+    }
+
+    /**
+    *  insert into.
+    */
+    public function values()
+    {
+        $args=func_get_args();
+        if( Utility::isNormalArray($args) && count($args)==2 )
+        {
+            $this->data[$args[0]] = $args[1];
+        }
+        else if( Utility::isAssocArray($args) )
+        {
+            $this->data=array_merge($this->data, $args );
+        }
+        else
+        {
+            throw new \Exception("unsupported arguments.");
+        }
+    }
+
+    /**
     *   condition
+     * select()->where()->where();
+     *  select()->andWhere()->andWhere();
+     * select()->orWhere(function($query){ $query->where()->where()})->orWhere();
+     * select()->where()->where(function($query){$query->orWhere()->orWhere()});
     */
     public function where()
     {
+        $where=[];
         $args=func_get_args();
+        $argc=count($args);
+        if( $argc==1 && is_callable($args[0]) )
+        {
+
+        }
+        else if ( $argc==2 )
+        {
+
+        }
+        else if( $argc==3 )
+        {
+
+        }
         return $this;
     }
 
     public function andWhere()
     {
         $args=func_get_args();
+
         return $this;
     }
 
     public function  orWhere()
     {
         $args=func_get_args();
+
         return $this;
     }
 
-    public function orderBy($field,$order)
+    public function orderBy($field,$order=SORT_ASC)
     {
-        $args=func_get_args();
-        if( $args[0] )
-        {
-
-        }
+        array_push($this->orders, [$field, $order]);
+        return $this;
     }
 
-    public function groupBy()
+    public function groupBy($field)
     {
+        array_push($this->groups, $field);
+        return $this;
+    }
 
+    public function having()
+    {
+        return $this;
     }
 
     public function skip($offset)
     {
         $this->skip=$offset;
+        return $this;
     }
 
     public function take($take)
     {
         $this->take=$take;
+        return $this;
     }
-
-    /**
-    *  Cascade
-    */
-    public function join()
-    {
-
-    }
-
-    public function leftJoin()
-    {
-
-    }
-
-    public function rightJoin()
-    {
-
-    }
-
-    public function fullJoin()
-    {
-
-    }
-
-    public function union()
-    {
-
-    }
-
 
 
     /**
     *  trigger
     */
-    public function fetch()
-    {
+    abstract public function execute();
 
-    }
+    abstract public function fetch();
 
-    public function fetchRow()
-    {
+    abstract public function fetchRow();
 
-    }
+    abstract public function fetchPair();
 
-    public function fetchPair()
-    {
+    abstract public function fetchGroup();
 
-    }
-
-    public function fetchGroup()
-    {
-
-    }
-
-    public function fetchAll()
-    {
-
-    }
+    abstract public function fetchAll();
 
     /**
     *  aggregation
@@ -164,11 +217,30 @@ abstract class Query
 
 
     /**
-    *  原生的语句
+    *  assemble fluent query.
      */
-    abstract public function assemble();
+    public function assemble()
+    {
+        if( empty( $this->scenario ) ) {
+            throw new \Exception("null scenario.");
+        }
 
-    abstract public function execute();
+        if( $this->scenario=='select' ) {
+            return $this->assembleSelect();
+        }else if ( $this->scenario=='insert' ) {
+            return $this->assembleInsert();
+        }else if( $this->scenario=='update' ) {
+            return $this->assembleUpdate();
+        }else if( $this->scenario=='delete' ) {
+            return $this->assembleDelete();
+        }
+    }
 
+    abstract protected function assembleSelect();
+
+    abstract protected function assembleInsert();
+
+    abstract protected function assembleUpdate();
+
+    abstract protected function assembleDelete();
 }
-

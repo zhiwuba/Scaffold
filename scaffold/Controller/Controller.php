@@ -10,37 +10,18 @@
 namespace Scaffold\Controller;
 
 use Scaffold\Application\Application;
+use Scaffold\Application\AppTrait;
 
 abstract class Controller
 {
-    /**
-    *  @var \Scaffold\Application\Application;
-    */
-    protected $app;
+    use AppTrait;
 
-    /**
-    * @return Application
-    */
-    public function getApplication()
-    {
-        return $this->app;
-    }
-
-    /**
-    * @param $app Application
-    */
-    public function setApplication(Application $app)
-    {
-        $this->app=$app;
-    }
-
-
-    public function _before()
+    public function beforeFilter()
     {
 
     }
 
-    public function _after()
+    public function afterFilter()
     {
 
     }
