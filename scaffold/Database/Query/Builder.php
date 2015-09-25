@@ -10,31 +10,25 @@ namespace Scaffold\Database\Query;
 
 use Scaffold\Helper\Utility;
 
-abstract class Query
+abstract class Builder
 {
     protected static $sortOrder=[
         SORT_ASC=>'asc',
         SORT_DESC=>'desc'
     ];
 
-    protected $scenario;
+    protected $scenario='select';
 
     protected $table;
+
+    protected $model;
 
     protected $selects=[];
 
     /**
-     * @var array
-     *                 tree
-     *                 and
-     *             /          \
-     *          or           and
-     *        /    \          /   \
-     *     a=b  c=d   e=f   or
-     *                             /   \
-     *                       m=n  p=q
+     * @var Where
      */
-    protected $wheres=[];
+    protected $where;
 
     protected $orders=[];
 
@@ -46,9 +40,12 @@ abstract class Query
 
     protected $data=[];
 
+    protected $bindings=[];
+
     public function __construct($tableName)
     {
         $this->table=$tableName;
+        $this->where=new Where();
     }
 
     /**
@@ -64,16 +61,19 @@ abstract class Query
     public function insert()
     {
         $this->scenario='insert';
+        return $this;
     }
 
     public function update()
     {
         $this->scenario='update';
+        return $this;
     }
 
     public function delete()
     {
         $this->scenario='delete';
+        return $this;
     }
 
     /**
@@ -116,63 +116,55 @@ abstract class Query
         {
             throw new \Exception("unsupported arguments.");
         }
+        return $this;
     }
 
     /**
     *   condition
      * select()->where()->where();
-     *  select()->andWhere()->andWhere();
+     * select()->andWhere()->andWhere();
      * select()->orWhere(function($query){ $query->where()->where()})->orWhere();
      * select()->where()->where(function($query){$query->orWhere()->orWhere()});
     */
     public function where()
     {
-        $where=[];
         $args=func_get_args();
-        $argc=count($args);
-        if( $argc==1 && is_callable($args[0]) )
+        if( count($args)==1 && $args[0] instanceof Where)
         {
-
+            $this->where=$args[0];
         }
-        else if ( $argc==2 )
+        else
         {
-
-        }
-        else if( $argc==3 )
-        {
-
+            call_user_func_array([$this->where, 'andWhere'], func_get_args());
         }
         return $this;
     }
 
     public function andWhere()
     {
-        $args=func_get_args();
-
+        call_user_func_array([$this->where, 'andWhere'], func_get_args());
         return $this;
     }
 
     public function  orWhere()
     {
-        $args=func_get_args();
-
+        call_user_func_array([$this->where, 'orWhere'], func_get_args());
         return $this;
     }
 
-    public function orderBy($field,$order=SORT_ASC)
+    public function orderBy($field,$order='asc')
     {
-        array_push($this->orders, [$field, $order]);
+        $order=strtolower($order);
+        if( in_array($order, ['asc', 'desc']) )
+        {
+            array_push($this->orders, [$field, $order]);
+        }
         return $this;
     }
 
     public function groupBy($field)
     {
         array_push($this->groups, $field);
-        return $this;
-    }
-
-    public function having()
-    {
         return $this;
     }
 
@@ -187,7 +179,6 @@ abstract class Query
         $this->take=$take;
         return $this;
     }
-
 
     /**
     *  trigger
@@ -209,12 +200,25 @@ abstract class Query
     */
     abstract public function count();
 
-    abstract public function max();
+    abstract public function max($column);
 
-    abstract public function min();
+    abstract public function min($column);
 
-    abstract public function sum();
+    abstract public function sum($column);
 
+    /**
+    *  model
+     * @param Model $model
+    */
+    public function setModel($model)
+    {
+        $this->model=$model;
+    }
+
+    public function getModel()
+    {
+        return $this->model;
+    }
 
     /**
     *  assemble fluent query.

@@ -6,21 +6,13 @@
  * Time: 0:20
  */
 
-namespace Scaffold\Database\Query;
+namespace Scaffold\Database\Model;
 
-use Sacaffold\Database\Query\MysqlQuery;
 use Scaffold\Database\Model;
 
-class MysqlModel extends Model
+abstract class MysqlModel extends Model
 {
-    /**
-    * @return \Scaffold\Database\Query\MysqlQuery
-    */
-    public  function find()
-    {
-        $query=new MysqlQuery(static::$tableName);
-        return $query;
-    }
+    protected static $builderClass='\Scaffold\Database\Query\MysqlQuery';
 
 
 }

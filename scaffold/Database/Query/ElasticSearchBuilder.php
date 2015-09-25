@@ -6,7 +6,9 @@
  * Time: 下午8:57
  */
 
-class ElasticSearchQuery extends Query
+namespace Scaffold\Database\Query;
+
+class ElasticSearchBuilder extends Builder
 {
 
 }

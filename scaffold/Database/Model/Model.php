@@ -1,21 +1,34 @@
 <?php
 /**
- * Created by PhpStorm.
  * User: liubingxia
  * Date: 15-8-7
- * Time: 下午7:41
- */
+  */
 
 namespace Scaffold\Database;
 
-abstract class Model extends \ArrayObject
+use Scaffold\Database\Query\Builder;
+use Scaffold\Database\Query\Where;
+use Scaffold\Helper\Utility;
+
+abstract class Model extends \ArrayObject implements \JsonSerializable
 {
+    /**
+    *  @var string
+    */
     protected static $tableName;
-    protected static $primaryKey;
-    protected static $queryType;
 
     /**
-    * @var array
+    *  @var Array
+    */
+    protected static $primaryKey=[];
+
+    /**
+    *  @var string
+    */
+    protected static $builderClass;
+
+    /**
+    * @var array  different from ArrayObject.
      */
     protected $data;
 
@@ -25,62 +38,161 @@ abstract class Model extends \ArrayObject
     protected $scenario='create';
 
 
-    public static function create()
+    public function __construct($attribute=[])
     {
-        $instance=new static();
-        $instance->scenario='create';
+        $this->data=$attribute;
+    }
+
+    /**
+    *   instance with attribute.
+    */
+    public static function instance($attribute)
+    {
+        $instance=new static($attribute);
         return $instance;
     }
 
     /**
-    * find
+    * get builder.
+    * @return \Scaffold\Database\Query\Builder
     */
-    public abstract function find();
+    public static function find()
+    {
+        return self::getBuilder();
+    }
 
+    /**
+    *  get model  by primary key.
+    */
+    public static function findById()
+    {
+        $args=func_get_args();
+        if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
+        {
+            $key=array_combine(static::$primaryKey, $args);
+            return self::getBuilder()->where($key)->fetchRow();
+        }
+        else
+        {
+            throw new \InvalidArgumentException("wrong primary id.");
+        }
+    }
+
+    /**
+    * find by some ids.
+    * @return  array
+    */
+    public static function findByIds()
+    {
+       $args=func_get_args();
+        if( count(static::$primaryKey)==1 )
+        {
+            $key=static::$primaryKey[0];
+            $placeholder=implode(',', array_fill(0, count($args), '?'));
+            return self::getBuilder()->where("$key in ($placeholder)", $args)->fetchAll();
+        }
+        else
+        {
+            $builder=self::getBuilder();
+            foreach($args as $id)
+            {
+                $condition=array_combine(static::$primaryKey, $id);
+                $builder->orWhere($condition);
+            }
+            return $builder->fetchAll();
+        }
+    }
+
+
+    /**
+    * delete model.
+    */
     public function delete()
     {
+        $ret=self::getBuilder()->delete()->where($this->getPrimaryIdQuery())->execute();
+        return $ret;
+    }
 
+    /**
+    *  destroy model by id or ids
+     * @param int|array
+     * @return bool
+    */
+    public static function destroy()
+    {
+        $args=func_get_args();
+        if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
+        {
+            $data=array_combine(static::$primaryKey, $args);
+            $ret=self::getBuilder()->delete()->where($data)->execute();
+            return $ret;
+        }
+        else
+        {
+            throw new \InvalidArgumentException("wrong primary id.");
+        }
     }
 
     public function save()
     {
-
-    }
-
-    public function __get($name)
-    {
-        if( isset($this->data[$name]) )
+        $modify=$this->getArrayCopy();
+        if( $this->scenario=='create' )
         {
-            return $this->data[$name];
+            $ret=self::getBuilder()->insert()->values($modify)->execute();
+            return $ret;
         }
-        else
+        else if( $this->scenario=='update' )
         {
-            return null;
+            if( !Utility::isSubSet($modify ,$this->data) )
+            {
+                $ret=self::getBuilder()->update()->set($modify)->where($this->getPrimaryIdQuery())->execute();
+                return $ret;
+            }
         }
     }
 
-    public function __set($name, $value)
+    /**
+    *  get query object.
+    * @return Builder
+    */
+    public function getBuilder()
     {
-        $this->data[$name]=$value;
+        $query=new static::$builderClass(static::$tableName);
+        $query->setModel(get_called_class());
+        return $query;
     }
 
-    public function offsetExists($index)
+    /**
+    *  @return Where
+     * @throws \Exception
+    */
+    private function getPrimaryIdQuery()
     {
+        $where=new Where();
+        foreach(static::$primaryKey as $key)
+        {
+            if( isset($this->data[$key]) )
+            {
+                $where->andWhere("$key=?", $this->data[$key]);
+            }
+            else
+            {
+                throw new \Exception("can't find primary key.");
+            }
+        }
+        return $where;
+    }
+
+    public function offsetExists($index){
         parent::offsetExists($index);
     }
-
-    public function offsetGet($index)
-    {
+    public function offsetGet($index){
         parent::offsetGet($index);
     }
-
-    public function offsetSet($index, $value)
-    {
+    public function offsetSet($index, $value){
         parent::offsetSet($index, $value);
     }
-
-    public function offsetUnset($index)
-    {
+    public function offsetUnset($index){
         parent::offsetUnset($index);
     }
 }

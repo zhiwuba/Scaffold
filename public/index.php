@@ -17,6 +17,8 @@ define('ROOT_PATH', dirname(__DIR__));
 
 $app=new \Scaffold\Application\Application();
 
+$app->sourceMysqlFile(ROOT_PATH . 'app/Configs/mysql.php');
+
 $app->sourceRouteFile(ROOT_PATH . '/app/route.php');
 
 $app->run();

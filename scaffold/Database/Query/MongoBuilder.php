@@ -7,9 +7,9 @@
  */
 
 namespace Scaffold\Database\Query;
-use \Scaffold\Database\Query\Query;
 
-class MongoQuery extends Query
+
+class MongoBuilder extends Builder
 {
 
 }

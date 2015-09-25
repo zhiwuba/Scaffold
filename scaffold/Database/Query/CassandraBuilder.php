@@ -6,8 +6,9 @@
  * Time: 下午8:57
  */
 
+namespace Scaffold\Database\Query;
 
-class CassandraQuery extends Query
+class CassandraBuilder extends Builder
 {
     
 }

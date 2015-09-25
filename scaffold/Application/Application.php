@@ -8,6 +8,7 @@
 
 namespace Scaffold\Application;
 
+use Sacaffold\Database\Query\MysqlQuery;
 use Scaffold\Helper\Container;
 use Scaffold\Http\Response;
 use Scaffold\Http\ServerRequest;
@@ -89,6 +90,12 @@ class Application
     public function sourceRouteFile($filePath)
     {
         require_once "$filePath";
+    }
+
+    public function sourceMysqlFile($filePath)
+    {
+        $config=require_once "$filePath";
+
     }
 
     /**

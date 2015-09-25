@@ -33,8 +33,96 @@ class Utility
         return is_array($array) && array_diff_key($array, array_keys(array_keys($array)));
     }
 
+    /**
+    *  flatten array
+     * @param Array $array
+     * @return Array
+    */
+    public static function arrayFlatten(&$array)
+    {
+        $result=[];
+        foreach($array as $key=>$value)
+        {
+            if( is_array($value) )
+            {
+                $result=array_merge($result, Utility::arrayFlatten($value));
+            }
+            else
+            {
+                $result[]=$value;
+            }
+        }
+        return $result;
+    }
 
+    /**
+     * flatten an array and use dot to represent deep.
+    *  @param Array $array
+     * @return Array
+    */
+    public static function arrayDot(&$array, $prefix='')
+    {
+        $result=[];
+        foreach( $array as $key=>$value )
+        {
+            if( is_array($value) )
+            {
+                if( is_string($key) )
+                {
+                    $tmpPrefix=empty($prefix) ? $key : ($prefix . '.' . $key);
+                }
+                else
+                {
+                    $tmpPrefix=$prefix;
+                }
+                $result=array_merge($result, Utility::arrayDot($value, $tmpPrefix));
+            }
+            else
+            {
+                $result[]=empty($prefix) ? $value : ($prefix . '.' . $value);
+            }
+        }
+        return $result;
+    }
 
+    /**
+    *  whether array1 is array2 's subset or not.
+     * @param Array $array1
+     * @param Array $array2
+     * @return bool
+    */
+    public static function isSubSet($array1, $array2)
+    {
+        foreach(  )
+        {
+
+        }
+    }
+
+    /**
+    *  snake to camel.
+    */
+    public static function camelCase($input)
+    {
+        $words=explode('_', $input);
+        $result=array_shift($words);
+        foreach( $words as $word )
+        {
+            $result .=ucfirst($word);
+        }
+        return $result;
+    }
+
+    /**
+    * camel to snake
+    */
+    public static function snakeCase($input)
+    {
+        $result=preg_replace_callback('#[A-Z]#', function($matches){
+            return '_' . strtolower($matches[0]);
+        }, $input );
+        return $result;
+    }
 
 }
 
