@@ -13,11 +13,11 @@ class MysqlConnector extends Connector
     /**
     *  @var  Array  all connector.
     * [
-    *   'name'=>['type'=>'read', 'connection'=>$connection, 'config'=>[]] ,
-    *   'name'=>['type'=>'write', 'connection'=>$connection, 'config'=>[]]
+    *   'name'=>['host'=>'' , 'type'=>'read', 'connection'=>$connection] ,
+    *   'name'=>['host'=>'', 'type'=>'write', 'connection'=>$connection]
     * ]
     */
-    protected $connectors;
+    protected $connectors=[];
 
     /**
     *  @var \PDO
@@ -25,20 +25,49 @@ class MysqlConnector extends Connector
     protected $connector;
 
     /**
+    * @var string
+    */
+    protected $config;
+
+    /**
     *  @var int.  nesting transaction.
     */
     protected $transactionCounter=0;
 
 
-    public static function loadConfig($configs)
+    /**
+    *  load config
+     * @param $configs Array
+    */
+    public function loadConfig($configs)
     {
-
+        $this->config=array_filter($configs, function($var){
+            return !is_array($var);
+        });
+        $reads=isset($configs['read'])? $configs['read'] : [];
+        $writes=isset($configs['write'])? $configs['write'] : [];
+        foreach($reads as $name=>$host)
+        {
+            $this->connectors[$name]=[
+                'host'=>$host,
+                'type'=>'read',
+                'connection'=>NULL
+            ];
+        }
+        foreach($writes as $name=>$host)
+        {
+            $this->connectors[$name]=[
+                'host'=>$host,
+                'type'=>'write',
+                'connection'=>NULL
+            ];
+        }
     }
 
     /**
     *  create connection
     */
-    public static function connect($config)
+    public  function connect($config)
     {
         try
         {
@@ -53,17 +82,13 @@ class MysqlConnector extends Connector
         }
     }
 
-
-
     public function getReadConnector()
     {
-
         return ;
     }
 
     public function getWriteConnector()
     {
-
         return ;
     }
 
@@ -75,7 +100,8 @@ class MysqlConnector extends Connector
             {
                 if( !isset($connector['connection']) || !($connector['connection'] instanceof \PDO) )
                 {
-                    $connector['connection']=$this->connect($connector['config']);
+                    $config=array_merge($connector['config'], ['host'=>$connector['host']]);
+                    $connector['connection']=$this->connect($config);
                 }
                 return $connector['connection'];
             }
@@ -102,7 +128,6 @@ class MysqlConnector extends Connector
             return ['ret'=>0, 'error'=>$e->getMessage()];
         }
     }
-
 
     public function setAttribute($key, $value)
     {

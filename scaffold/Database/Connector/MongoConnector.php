@@ -6,6 +6,9 @@
  * Time: 上午11:49
  */
 
-class MongoConnector {
+namespace Scaffold\Database\Connector;
+
+class MongoConnector extends  Connector
+{
 
 }

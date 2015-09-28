@@ -234,7 +234,14 @@ class MysqlBuilder extends Builder
     {
         $bindings=[];
         if( !empty($this->selects) ) {
-            $sql='SELECT ' . implode(',' , $this->selects);
+            $selects=array_map(function($select){
+                if( is_array($select) ){
+                    return key($select) . " AS " . current($select);
+                }else{
+                    return $select;
+                }
+            }, $this->selects);
+            $sql='SELECT ' . implode(',' , $selects);
         }else {
             $sql='SELECT *';
         }

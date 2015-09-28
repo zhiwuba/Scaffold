@@ -10,6 +10,10 @@ namespace Scaffold\Database\Connector;
 
 abstract class Connector
 {
-
+    /**
+    *  load config file
+     * @param $config array
+    */
+    abstract public function loadConfig($config);
 
 }

@@ -6,6 +6,9 @@
  * Time: 上午11:50
  */
 
-class ElasticSearchConnector {
+namespace Scaffold\Database\Connector;
+
+class ElasticSearchConnector extends Connector
+{
 
 }

@@ -58,7 +58,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public static function find()
     {
-        return self::getBuilder();
+        return self::getBuilder()->select();
     }
 
     /**
@@ -84,7 +84,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public static function findByIds()
     {
-       $args=func_get_args();
+        $args=func_get_args();
         if( count(static::$primaryKey)==1 )
         {
             $key=static::$primaryKey[0];
@@ -133,6 +133,10 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         }
     }
 
+    /**
+    *  save the update or create data.
+     * @return bool
+    */
     public function save()
     {
         $modify=$this->getArrayCopy();

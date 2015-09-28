@@ -11,13 +11,8 @@ namespace Scaffold\Database\Model;
 use Scaffold\Database\Model;
 use Scaffold\Database\Query\MongoBuilder;
 
-class MongoModel extends Model
+abstract class MongoModel extends Model
 {
-    public function find()
-    {
-        $query=new MongoBuilder(static::$tableName);
-        return $query;
-    }
 
 }
 
