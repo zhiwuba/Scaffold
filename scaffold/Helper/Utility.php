@@ -87,16 +87,31 @@ class Utility
 
     /**
     *  whether array1 is array2 's subset or not.
+     * different from array_diff_assoc().
      * @param Array $array1
      * @param Array $array2
      * @return bool
     */
     public static function isSubSet($array1, $array2)
     {
-        foreach(  )
-        {
-
+        foreach( $array1 as $key=>$value ) {
+            if( isset($array2[$key]) ) {
+                if( is_array($value) ) {
+                    if( !Utility::isSubSet($value, $array2[$key]) ) {
+                        return false;
+                    }
+                }
+                else {
+                    if( $value!==$array2[$key] ) {
+                        return false;
+                    }
+                }
+            }
+            else {
+                return false;
+            }
         }
+        return true;
     }
 
     /**

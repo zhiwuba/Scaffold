@@ -1,22 +1,17 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-8-7
- * Time: 下午8:57
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Scaffold\Database\Query;
 
-use Scaffold\Database\Query\Builder;
-
 class MysqlBuilder extends Builder
 {
-    /**
-    *  @var \PDO will be array for distribute arch.
-    */
-    public static $adapter;
-
     /**
      * @var array
      */
@@ -27,14 +22,26 @@ class MysqlBuilder extends Builder
     */
     protected $haves;
 
-    public static function getMysqlAdapter()
-    {
-        return static::$adapter;
-    }
+    /**
+     *  @var int.  nesting transaction.
+     */
+    protected static $transactionCounter=0;
 
-    public static function setMysqlAdapter($adapter)
+    /**
+     * choose connection
+    *  @param string $name
+     * @return $this
+    */
+    public function choose($name)
     {
-        static::$adapter=$adapter;
+        if( empty($name) ) {
+            $connection=static::$connector->getDefaultConnection();
+        }
+        else {
+            $connection=static::$connector->switchConnection($name);
+        }
+        $this->setConnection($connection);
+        return $this;
     }
 
     /**
@@ -87,7 +94,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=['count(*)'];
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -104,7 +111,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["max($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -121,7 +128,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["min($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -138,7 +145,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["sum($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -151,7 +158,7 @@ class MysqlBuilder extends Builder
 
     public function lastInsertId()
     {
-        return static::$adapter->lastInsertId();
+        return static::$connection->lastInsertId();
     }
 
     /**
@@ -162,7 +169,7 @@ class MysqlBuilder extends Builder
         if( in_array($this->scenario, ['insert', 'update', 'delete']) )
         {
             list($sql, $bindings)=$this->assemble();
-            $sth=static::$adapter->prepare($sql);
+            $sth=static::$connection->prepare($sql);
             $ret=$sth->execute($bindings);
             return $ret;
         }
@@ -182,7 +189,7 @@ class MysqlBuilder extends Builder
         if( in_array($this->scenario, ['select']) )
         {
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetch(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -212,7 +219,7 @@ class MysqlBuilder extends Builder
         if( in_array($this->scenario, ['select']) )
         {
             list($sql, $params)=$this->assemble();
-            $stm=static::$adapter->prepare($sql);
+            $stm=static::$connection->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetchAll(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -228,6 +235,58 @@ class MysqlBuilder extends Builder
         {
             throw new \Exception("fetchAll only support select.");
         }
+    }
+
+    /**
+     *  transaction.
+     * @param $callback \Closure
+     * @return mixed
+     */
+    public static function transaction(\Closure $callback)
+    {
+        try
+        {
+            static::setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            static::beginTransaction();
+            $callback();
+            static::commit();
+            return ['ret'=>1];
+        }
+        catch(\PDOException $e)
+        {
+            static::rollBack();
+            return ['ret'=>0, 'error'=>$e->getMessage()];
+        }
+    }
+
+    public static function setAttribute($key, $value)
+    {
+        return static::getConnection()->setAttribute($key, $value);
+    }
+
+    public static function beginTransaction()
+    {
+        if( !static::$transactionCounter++ )
+            return static::getConnection()->beginTransaction();
+        return static::$transactionCounter >= 0;
+    }
+
+    public static function commit()
+    {
+        if( !--static::$transactionCounter )
+            return static::getConnection()->commit();
+        return static::$transactionCounter>=0;
+    }
+
+    public static function rollBack()
+    {
+        if( static::$transactionCounter>=0 )
+        {
+            static::$transactionCounter=0;
+            return static::getConnection()->rollBack();
+        }
+        static::$transactionCounter=0;
+        return false;
     }
 
     protected function assembleSelect()

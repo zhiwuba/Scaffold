@@ -8,7 +8,8 @@
 
 namespace Scaffold\Application;
 
-use Sacaffold\Database\Query\MysqlQuery;
+use Scaffold\Database\Query\MysqlBuilder;
+use Scaffold\Database\Connector\MysqlConnector;
 use Scaffold\Helper\Container;
 use Scaffold\Http\Response;
 use Scaffold\Http\ServerRequest;
@@ -92,10 +93,14 @@ class Application
         require_once "$filePath";
     }
 
+    /**
+    * source mysql config.
+    */
     public function sourceMysqlFile($filePath)
     {
         $config=require_once "$filePath";
-
+        $connector=MysqlConnector::loadConfig($config);
+        MysqlBuilder::setConnector($connector);
     }
 
     /**

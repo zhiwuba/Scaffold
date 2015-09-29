@@ -1,10 +1,14 @@
 <?php
-/**
- * User: liubingxia
- * Date: 15-8-7
-  */
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Scaffold\Database;
+namespace Scaffold\Database\Model;
 
 use Scaffold\Database\Query\Builder;
 use Scaffold\Database\Query\Where;
@@ -32,11 +36,6 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      */
     protected $data;
 
-    /**
-    * @var string
-     */
-    protected $scenario='create';
-
 
     public function __construct($attribute=[])
     {
@@ -45,11 +44,18 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
     /**
     *   instance with attribute.
+     * @param $attribute Array
+     * @return Model
     */
     public static function instance($attribute)
     {
-        $instance=new static($attribute);
-        return $instance;
+        if( !empty($attribute) ) {
+            $instance=new static($attribute);
+            return $instance;
+        }
+        else {
+            return NULL;
+        }
     }
 
     /**
@@ -63,6 +69,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
     /**
     *  get model  by primary key.
+     * @return $this
     */
     public static function findById()
     {
@@ -70,7 +77,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
         {
             $key=array_combine(static::$primaryKey, $args);
-            return self::getBuilder()->where($key)->fetchRow();
+            return self::getBuilder()->where(self::getIdQuery($key))->fetchRow();
         }
         else
         {
@@ -96,8 +103,8 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
             $builder=self::getBuilder();
             foreach($args as $id)
             {
-                $condition=array_combine(static::$primaryKey, $id);
-                $builder->orWhere($condition);
+                $key=array_combine(static::$primaryKey, $id);
+                $builder->orWhere(self::getIdQuery($key));
             }
             return $builder->fetchAll();
         }
@@ -109,7 +116,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public function delete()
     {
-        $ret=self::getBuilder()->delete()->where($this->getPrimaryIdQuery())->execute();
+        $ret=self::getBuilder()->delete()->where($this->getIdQuery())->execute();
         return $ret;
     }
 
@@ -140,16 +147,16 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     public function save()
     {
         $modify=$this->getArrayCopy();
-        if( $this->scenario=='create' )
+        if( empty($this->data) )
         {
             $ret=self::getBuilder()->insert()->values($modify)->execute();
             return $ret;
         }
-        else if( $this->scenario=='update' )
+        else
         {
             if( !Utility::isSubSet($modify ,$this->data) )
             {
-                $ret=self::getBuilder()->update()->set($modify)->where($this->getPrimaryIdQuery())->execute();
+                $ret=self::getBuilder()->update()->set($modify)->where($this->getIdQuery())->execute();
                 return $ret;
             }
         }
@@ -167,24 +174,37 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     }
 
     /**
-    *  @return Where
+     * get primary id query.
+     * @param $data Array
+     * @return Where
      * @throws \Exception
     */
-    private function getPrimaryIdQuery()
+    private function getIdQuery(array $data=[])
     {
+        if( empty($data) ) {
+            $data=&$this->data;
+        }
+
         $where=new Where();
-        foreach(static::$primaryKey as $key)
-        {
-            if( isset($this->data[$key]) )
-            {
-                $where->andWhere("$key=?", $this->data[$key]);
+        foreach(static::$primaryKey as $key) {
+            if( isset($data[$key]) ) {
+                $where->andWhere("$key=?", $data[$key]);
             }
-            else
-            {
+            else {
                 throw new \Exception("can't find primary key.");
             }
         }
         return $where;
+    }
+
+    /**
+    * to json.
+    */
+    public function jsonSerialize()
+    {
+        $copy=$this->getArrayCopy();
+        $data=array_merge($copy, $this->data);
+        return $data;
     }
 
     public function offsetExists($index){

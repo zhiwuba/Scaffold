@@ -1,9 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-8-7
- * Time: 下午3:08
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Scaffold\Database\Query;
@@ -16,6 +18,13 @@ abstract class Builder
         SORT_ASC=>'asc',
         SORT_DESC=>'desc'
     ];
+
+    /**
+    * @var  \Scaffold\Database\Connector\Connector
+    */
+    protected static $connector;
+
+    protected static $connection;
 
     protected $scenario='select';
 
@@ -46,6 +55,30 @@ abstract class Builder
     {
         $this->table=$tableName;
         $this->where=new Where();
+    }
+
+    public static function getConnector()
+    {
+        return static::$connector;
+    }
+
+    /**
+    * @param $connector \Scaffold\Database\Connector\Connector
+    */
+    public static function setConnector($connector)
+    {
+        static::$connector = $connector;
+        static::$connection=$connector->getDefaultConnection();
+    }
+
+    public static function getConnection()
+    {
+        return static::$connection;
+    }
+
+    public static function setConnection($connection)
+    {
+        static::$connection=$connection;
     }
 
     /**
@@ -87,9 +120,9 @@ abstract class Builder
         {
             $this->data[$args[0]]=$args[1];
         }
-        else if( Utility::isAssocArray($args) )
+        else if( Utility::isAssocArray($args[0]) )
         {
-            $this->data=array_merge($this->data, $args);
+            $this->data=array_merge($this->data, $args[0]);
         }
         else
         {
@@ -108,9 +141,9 @@ abstract class Builder
         {
             $this->data[$args[0]] = $args[1];
         }
-        else if( Utility::isAssocArray($args) )
+        else if( Utility::isAssocArray($args[0]) )
         {
-            $this->data=array_merge($this->data, $args );
+            $this->data=array_merge($this->data, $args[0]);
         }
         else
         {
@@ -135,7 +168,7 @@ abstract class Builder
         }
         else
         {
-            call_user_func_array([$this->where, 'andWhere'], func_get_args());
+            call_user_func_array([$this->where, 'andWhere'], $args);
         }
         return $this;
     }

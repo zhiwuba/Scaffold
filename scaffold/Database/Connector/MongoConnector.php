@@ -1,9 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-9-25
- * Time: 上午11:49
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Scaffold\Database\Connector;

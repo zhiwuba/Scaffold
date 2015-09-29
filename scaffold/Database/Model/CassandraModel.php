@@ -8,9 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Scaffold\Database\Connector;
+namespace Scaffold\Database\Model;
 
-class ElasticSearchConnector extends Connector
+class CassandraModel extends Model
 {
 
 }
