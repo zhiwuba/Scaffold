@@ -8,10 +8,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Scaffold\Database\Model;
+return array(
+    "host"=>[
 
-class ElasticSearchModel extends Model
-{
-    protected static $builderClass='\Scaffold\Database\Query\ElasticSearchBuilder';
-
-}
+    ]
+);

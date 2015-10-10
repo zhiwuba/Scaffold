@@ -12,5 +12,6 @@ namespace Scaffold\Database\Model;
 
 class CassandraModel extends Model
 {
+    protected static $builderClass='\Scaffold\Database\Query\CassandraBuilder';
 
 }

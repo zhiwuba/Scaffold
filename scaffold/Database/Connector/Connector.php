@@ -24,18 +24,4 @@ abstract class Connector
         return $instance;
     }
 
-    /**
-     *  switch connection.
-     * @param $name string
-     * @return Object
-     */
-    abstract public function switchConnection($name);
-
-
-    /**
-     * get default connection.
-    * @return Object
-    */
-    abstract public function getDefaultConnection();
-
 }

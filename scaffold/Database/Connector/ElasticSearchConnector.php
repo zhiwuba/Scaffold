@@ -10,7 +10,13 @@
 
 namespace Scaffold\Database\Connector;
 
+use Elasticsearch\ClientBuilder;
+
 class ElasticSearchConnector extends Connector
 {
-
+    public $client;
+    public function __construct($config)
+    {
+        $this->client=ClientBuilder::create()->setHosts($config)->build();
+    }
 }
