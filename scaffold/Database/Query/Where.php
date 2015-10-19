@@ -14,21 +14,75 @@ use \Scaffold\Helper\Utility;
 
 class Condition
 {
-    public function __construct($expression, $values)
-    {
-        $this->expression=$expression;
-        $this->values=$values;
-    }
+	/**
+	* @var array
+	*/
+	public static $supportOperate=[ '=',  '!=', '>=', '>', '<=', '<', 'in' , 'not in'];
 
     /**
      *  @var string
      */
-    public $expression;
+    public $name;
+
+	/**
+	* @var string
+	*/
+	public $operate;
 
     /**
      *  @var Array placeholder value.
      */
     public $values=[];
+
+
+	/**
+	*  __construct
+	 * @param $name string
+	 * @param $operate string
+	 * @param $values array
+	*/
+	public function __construct($name, $operate , $values)
+	{
+		$this->name=$name;
+		$this->operate=$this->checkOperate($operate);
+        $this->values  =$this->checkValues($values);
+    }
+
+	/**
+	 * check whether support this operate or not.
+	* @param $operate string
+	 * @return string
+	*/
+	private function checkOperate($operate)
+	{
+		$operate=strtolower($operate);
+		if( false===array_search($operate, static::$supportOperate ) )
+		{
+			throw new \InvalidArgumentException("unsupported operate: $operate");
+		}
+		return $operate;
+	}
+
+	/**
+	 * check values for operate
+	* @param $values array
+	 * @return array
+	*/
+	private function checkValues($values)
+	{
+		$operates=array_slice(static::$supportOperate, 0, -2);
+		if( in_array($this->operate, $operates) ) {
+			if (count($values) > 1) {
+				throw new \InvalidArgumentException("unsupported values for operate {$this->operate}, and values is" . json_encode($values));
+			}
+		}
+		else {
+			if (count($values) == 0) {
+				throw new \InvalidArgumentException("unsupported values for operate {$this->operate}, and values is" . json_encode($values));
+			}
+		}
+		return $values;
+	}
 
 }
 
@@ -53,6 +107,10 @@ class Where
     */
     protected $subCondition=[];
 
+	public function getRelationOperate()
+	{
+		return $this->relationOperate;
+	}
 
     public function addSubCondition(Condition $condition)
     {
@@ -137,37 +195,4 @@ class Where
         return $this;
     }
 
-
-    /**
-    *   assemble
-     * @return array($expression, $bindings)
-    */
-    public function assemble()
-    {
-        $bindings=[];
-        $parts=[];
-        foreach($this->subWhere as $relation)
-        {
-            list($childExp, $childValues)=$relation->assemble();
-            $parts[]='(' . $childExp  . ')';
-            $bindings=array_merge($bindings, $childValues);
-        }
-
-        $conditionsExp=[];
-        foreach($this->subCondition as $condition)
-        {
-            $conditionsExp[]=$condition->expression;
-            $bindings=array_merge($bindings, $condition->values);
-        }
-
-        $parts[]=implode($this->relationOperate, $conditionsExp);
-
-        $parts=array_filter($parts, function($part){
-            return !empty($part);
-        });
-
-        $expression=implode($this->relationOperate, $parts);
-
-        return array($expression, $bindings);
-    }
 }

@@ -63,6 +63,7 @@ abstract class Builder
     }
 
     /**
+	 *  set connector
     * @param $connector \Scaffold\Database\Connector\Connector
     */
     public static function setConnector($connector)
@@ -76,6 +77,10 @@ abstract class Builder
         return static::$connection;
     }
 
+	/**
+	*  set connection
+	 * @param \Scaffold\Database\Connector\Connector $connection
+	*/
     public static function setConnection($connection)
     {
         static::$connection=$connection;

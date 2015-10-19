@@ -14,9 +14,23 @@ use Elasticsearch\ClientBuilder;
 
 class ElasticSearchConnector extends Connector
 {
+	/**
+	* @var \Elasticsearch\Client
+	*/
     public $client;
+
     public function __construct($config)
     {
         $this->client=ClientBuilder::create()->setHosts($config)->build();
     }
+
+	/**
+	 * get default connection.
+	 * @return \Elasticsearch\Client
+	 */
+	public function getDefaultConnection()
+	{
+		return $this->client;
+	}
+
 }

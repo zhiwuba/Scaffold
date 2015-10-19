@@ -24,4 +24,11 @@ abstract class Connector
         return $instance;
     }
 
+
+	/**
+	 * get default connection.
+	 * @return Object
+	 */
+	abstract public function getDefaultConnection();
+
 }

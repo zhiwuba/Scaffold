@@ -168,8 +168,10 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['insert', 'update', 'delete']) )
         {
+			/**@var \PDO $pdo*/
+			$pdo=static::getConnection();
             list($sql, $bindings)=$this->assemble();
-            $sth=static::$connection->prepare($sql);
+            $sth=$pdo->prepare($sql);
             $ret=$sth->execute($bindings);
             return $ret;
         }
@@ -188,8 +190,10 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['select']) )
         {
+			/** @var  \PDO $pdo*/
+			$pdo=static::getConnection();
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=$pdo->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetch(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -218,8 +222,10 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['select']) )
         {
+			/** @var  \PDO $pdo*/
+			$pdo=static::getConnection();
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=$pdo->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetchAll(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -261,29 +267,36 @@ class MysqlBuilder extends Builder
 
     public static function setAttribute($key, $value)
     {
-        return static::getConnection()->setAttribute($key, $value);
+		/** @var  \PDO $pdo **/
+		$pdo=static::getConnection();
+        return $pdo->setAttribute($key, $value);
     }
 
     public static function beginTransaction()
     {
+		/** @var  \PDO $pdo **/
+		$pdo=static::getConnection();
         if( !static::$transactionCounter++ )
-            return static::getConnection()->beginTransaction();
+            return $pdo->beginTransaction();
         return static::$transactionCounter >= 0;
     }
 
     public static function commit()
     {
+		/** @var  \PDO $pdo **/
+		$pdo=static::getConnection();
         if( !--static::$transactionCounter )
-            return static::getConnection()->commit();
+            return $pdo->commit();
         return static::$transactionCounter>=0;
     }
 
     public static function rollBack()
     {
-        if( static::$transactionCounter>=0 )
-        {
+        if( static::$transactionCounter>=0 ) {
             static::$transactionCounter=0;
-            return static::getConnection()->rollBack();
+			/** @var  \PDO $pdo **/
+			$pdo=static::getConnection();
+            return $pdo->rollBack();
         }
         static::$transactionCounter=0;
         return false;
@@ -383,5 +396,38 @@ class MysqlBuilder extends Builder
         $sql="DELETE FROM {$this->table} WHERE $where";
         return array($sql, $bindings);
     }
+
+	/**
+	* @param Where $where
+	 * @return array($expression, $bindings)
+	*/
+	protected function assembleWhere($where)
+	{
+		$bindings=[];
+		$parts=[];
+		foreach($where->getSubWhere() as $relation)
+		{
+			list($childExp, $childValues)=$this->assembleWhere($relation);
+			$parts[]='(' . $childExp  . ')';
+			$bindings=array_merge($bindings, $childValues);
+		}
+
+		$conditionsExp=[];
+		foreach($where->getSubCondition() as $condition)
+		{
+			$conditionsExp[]=$condition->name;
+			$bindings=array_merge($bindings, $condition->values);
+		}
+
+		$parts[]=implode($where->getRelationOperate(), $conditionsExp);
+
+		$parts=array_filter($parts, function($part){
+			return !empty($part);
+		});
+
+		$expression=implode($where->getRelationOperate(), $parts);
+
+		return array($expression, $bindings);
+	}
 
 }
