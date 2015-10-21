@@ -419,13 +419,14 @@ class MysqlBuilder extends Builder
 			$bindings=array_merge($bindings, $condition->values);
 		}
 
-		$parts[]=implode($where->getRelationOperate(), $conditionsExp);
+        $relation=str_pad($where->getRelationOperate(), 1, ' ', STR_PAD_BOTH);
+		$parts[]=implode($relation , $conditionsExp);
 
 		$parts=array_filter($parts, function($part){
 			return !empty($part);
 		});
 
-		$expression=implode($where->getRelationOperate(), $parts);
+		$expression=implode($relation, $parts);
 
 		return array($expression, $bindings);
 	}

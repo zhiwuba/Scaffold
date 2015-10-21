@@ -89,8 +89,8 @@ class Condition
 
 class Where
 {
-    public static $relationOR=' OR ';
-    public static $relationAND=' AND ';
+    public static $relationOR='OR';
+    public static $relationAND='AND';
 
     /**
     *  @enum or and
@@ -186,9 +186,10 @@ class Where
         }
         else if( is_string($args[0]) )
         {
-            $expression=array_shift($args);
+            $name=array_shift($args);
+            $operate=array_shift($args);
             $values=Utility::arrayFlatten($args);
-            $condition=new Condition($expression, $values);
+            $condition=new Condition($name,$operate, $values);
             $relation->addSubCondition($condition);
         }
         $this->addSubWhere($relation);

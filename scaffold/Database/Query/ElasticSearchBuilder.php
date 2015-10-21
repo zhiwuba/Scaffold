@@ -155,8 +155,9 @@ class ElasticSearchBuilder extends Builder
 			'type'=> $this->table,
 			'body'=>	$body
 		];
-		$result=$client->search($param);
-		return $result;
+		//$result=$client->search($param);
+		//return $result;
+        return $param;
     }
 
     protected function assembleInsert()
@@ -214,15 +215,14 @@ class ElasticSearchBuilder extends Builder
 	protected function assembleWhere($where)
 	{
 		$parts=[];
-		foreach($where->getSubWhere() as $subWhere)
-		{
+        $relation=$where->getRelationOperate();
+		foreach($where->getSubWhere() as $subWhere) {
 			$childPart=[];
 			$childExp=$this->assembleWhere($subWhere);
-			$relation=$subWhere->getRelationOperate();
-			if( $relation=='or' ) {
+			if( $relation=='OR' ) {
 				$childPart['bool']['should'] = $childExp;
 			}
-			else if( $relation=='and' ) {
+			else if( $relation=='AND' ) {
 				$childPart['bool']['must'] = $childExp;
 			}
 			$parts[]=$childPart;
