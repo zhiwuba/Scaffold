@@ -123,12 +123,11 @@ $dd=<<<EOF
     ]
 }
 
-orWhere(
-    $this->andWhere(A)->andWhere(B)
+->orWhere(
+    $ this->andWhere(A)->andWhere(B)
 )->orWhere(
-    $this->andWhere(C)->andWhere(D)->andWhere(!E)
+    $ this->andWhere(C)->andWhere(D)->andWhere(!E)
 );
-
 
 EOF;
 

@@ -34,6 +34,10 @@ class Condition
      */
     public $values=[];
 
+	/**
+	* @var string
+	*/
+	public $relation;
 
 	/**
 	*  __construct
@@ -41,12 +45,23 @@ class Condition
 	 * @param $operate string
 	 * @param $values array
 	*/
-	public function __construct($name, $operate , $values)
+	public function __construct($relation, $name, $operate , $values)
 	{
 		$this->name=$name;
+		$this->relation=$relation;
 		$this->operate=$this->checkOperate($operate);
         $this->values  =$this->checkValues($values);
     }
+
+	/**
+	 *  check whether operate is Negate or not.
+	 * @return bool
+	 */
+	public function isNegative()
+	{
+		$ret=in_array($this->operate, ['!=',  'not in']);
+		return $ret;
+	}
 
 	/**
 	 * check whether support this operate or not.
@@ -142,7 +157,7 @@ class Where
         if( $this->relationOperate!==static::$relationAND)
         {
             $this->relationOperate=static::$relationOR;
-            call_user_func_array(array($this, 'addWhere'), $args);
+			call_user_func_array(array($this, 'addWhere'), $args);
             return $this;
         }
         else
@@ -177,22 +192,21 @@ class Where
     {
         $args=func_get_args();
 
-        $relation=new Where();
-
         if( is_object($args[0]) && is_callable($args[0]) )
         {
+            $relation=new Where();
             $callback=$args[0];
             $callback($relation);
+            $this->addSubWhere($relation);
         }
         else if( is_string($args[0]) )
         {
             $name=array_shift($args);
-            $operate=array_shift($args);
+			$operate=array_shift($args);
             $values=Utility::arrayFlatten($args);
-            $condition=new Condition($name,$operate, $values);
-            $relation->addSubCondition($condition);
+            $condition=new Condition($this->relationOperate, $name, $operate, $values);
+            $this->addSubCondition($condition);
         }
-        $this->addSubWhere($relation);
         return $this;
     }
 

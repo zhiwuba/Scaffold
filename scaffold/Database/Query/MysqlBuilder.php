@@ -45,6 +45,14 @@ class MysqlBuilder extends Builder
     }
 
     /**
+     * @return  \PDO
+     */
+    public static function getConnection()
+    {
+        return parent::getConnection();
+    }
+
+    /**
      *  Cascade operate
      */
     public function join($table, $where)
@@ -94,7 +102,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=['count(*)'];
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -111,7 +119,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["max($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -128,7 +136,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["min($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -145,7 +153,7 @@ class MysqlBuilder extends Builder
         {
             $this->selects=["sum($column)"];
             list($sql, $params)=$this->assemble();
-            $stm=static::$connection->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $count=current($stm->fetch());
             return $count;
@@ -158,7 +166,7 @@ class MysqlBuilder extends Builder
 
     public function lastInsertId()
     {
-        return static::$connection->lastInsertId();
+        return static::getConnection()->lastInsertId();
     }
 
     /**
@@ -168,10 +176,8 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['insert', 'update', 'delete']) )
         {
-			/**@var \PDO $pdo*/
-			$pdo=static::getConnection();
             list($sql, $bindings)=$this->assemble();
-            $sth=$pdo->prepare($sql);
+            $sth=static::getConnection()->prepare($sql);
             $ret=$sth->execute($bindings);
             return $ret;
         }
@@ -190,10 +196,8 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['select']) )
         {
-			/** @var  \PDO $pdo*/
-			$pdo=static::getConnection();
             list($sql, $params)=$this->assemble();
-            $stm=$pdo->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetch(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -222,10 +226,8 @@ class MysqlBuilder extends Builder
     {
         if( in_array($this->scenario, ['select']) )
         {
-			/** @var  \PDO $pdo*/
-			$pdo=static::getConnection();
             list($sql, $params)=$this->assemble();
-            $stm=$pdo->prepare($sql);
+            $stm=static::getConnection()->prepare($sql);
             $stm->execute($params);
             $data=$stm->fetchAll(\PDO::FETCH_ASSOC);
             if( !empty($this->model) )
@@ -267,26 +269,20 @@ class MysqlBuilder extends Builder
 
     public static function setAttribute($key, $value)
     {
-		/** @var  \PDO $pdo **/
-		$pdo=static::getConnection();
-        return $pdo->setAttribute($key, $value);
+        return static::getConnection()->setAttribute($key, $value);
     }
 
     public static function beginTransaction()
     {
-		/** @var  \PDO $pdo **/
-		$pdo=static::getConnection();
         if( !static::$transactionCounter++ )
-            return $pdo->beginTransaction();
+            return static::getConnection()->beginTransaction();
         return static::$transactionCounter >= 0;
     }
 
     public static function commit()
     {
-		/** @var  \PDO $pdo **/
-		$pdo=static::getConnection();
         if( !--static::$transactionCounter )
-            return $pdo->commit();
+            return static::getConnection()->commit();
         return static::$transactionCounter>=0;
     }
 
@@ -294,9 +290,7 @@ class MysqlBuilder extends Builder
     {
         if( static::$transactionCounter>=0 ) {
             static::$transactionCounter=0;
-			/** @var  \PDO $pdo **/
-			$pdo=static::getConnection();
-            return $pdo->rollBack();
+            return static::getConnection()->rollBack();
         }
         static::$transactionCounter=0;
         return false;
@@ -324,7 +318,7 @@ class MysqlBuilder extends Builder
             $sql .= implode(' ', $this->joins);
         }
 
-        list($whereExp, $whereParams)=$this->where->assemble();
+        list($whereExp, $whereParams)=$this->assembleWhere($this->where);
         if( !empty($whereExp) ) {
             $sql .= " WHERE $whereExp";
             $bindings=array_merge($bindings, $whereParams);
@@ -375,7 +369,7 @@ class MysqlBuilder extends Builder
             $bindings[]=$value;
         }
 
-        list($where, $params)=$this->where->assemble();
+        list($where, $params)=$this->assembleWhere($this->where);
         if( !empty($where) ) {
             $bindings=array_merge($bindings, $params);
         }else{
@@ -388,7 +382,7 @@ class MysqlBuilder extends Builder
 
     protected function assembleDelete()
     {
-        list($where, $bindings)=$this->where->assemble();
+        list($where, $bindings)=$this->assembleWhere($this->where);
         if( empty($where) ){
             throw new \Exception("where must not be null in delete.");
         }
@@ -419,14 +413,14 @@ class MysqlBuilder extends Builder
 			$bindings=array_merge($bindings, $condition->values);
 		}
 
-        $relation=str_pad($where->getRelationOperate(), 1, ' ', STR_PAD_BOTH);
-		$parts[]=implode($relation , $conditionsExp);
+		$operate=str_pad($where->getRelationOperate(),1,  ' ', STR_PAD_BOTH );
+		$parts[]=implode($operate, $conditionsExp);
 
 		$parts=array_filter($parts, function($part){
 			return !empty($part);
 		});
 
-		$expression=implode($relation, $parts);
+		$expression=implode($operate, $parts);
 
 		return array($expression, $bindings);
 	}

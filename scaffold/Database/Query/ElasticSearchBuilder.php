@@ -55,49 +55,77 @@ class ElasticSearchBuilder extends Builder
 		$this->id=$id;
 	}
 
-	public function execute()
+    /**
+    * @return  \Elasticsearch\Client
+     */
+    public static function getConnection()
     {
-		if( in_array($this->scenario, ['insert', 'update', 'delete']) )
-		{
-			$result=$this->assemble();
-			return $result;
-		}
-		else
-		{
-			throw new \Exception("execute only support delete、update and insert!");
-		}
+        return parent::getConnection();
+    }
+
+    public function execute()
+    {
+        $connection=static::getConnection();
+        switch($this->scenario)
+        {
+            case 'insert':
+                $params=$this->assembleInsert();
+                $result=$connection->create($params);
+                break;
+            case 'update':
+                $params=$this->assembleUpdate();
+                $result=$connection->update($params);
+                break;
+            case 'delete':
+                $params=$this->assembleDelete();
+                $result=$connection->delete($params);
+                break;
+            default:
+                throw new BuilderException("execute only support delete、update and insert!");
+        }
+        return $result;
     }
 
     public function fetch()
 	{
-		if (in_array($this->scenario, ['select'])) {
+		if ( $this->scenario==='select' )
+        {
 			$result = $this->assemble();
 			return $result;
 		}
 		else
 		{
-			throw new \Exception("fetch only support select");
+			throw new BuilderException("ElasticSearch fetch only support select");
 		}
     }
 
     public function fetchRow()
     {
-
+        throw new BuilderException("ElasticSearch doesn't support fetchRow");
     }
 
     public function fetchPair()
     {
-
+        throw new BuilderException("ElasticSearch doesn't support fetchPair");
     }
 
     public function fetchGroup()
     {
-
+        throw new BuilderException("ElasticSearch doesn't support fetchGroup");
     }
 
     public function fetchAll()
     {
-
+        if( $this->scenario==='select' )
+        {
+            $params=$this->assembleSelect();
+            $result=static::getConnection()->search($params);
+            return $result;
+        }
+        else
+        {
+            throw new BuilderException("ElasticSearch fetchAll only support select");
+        }
     }
 
     /**
@@ -105,17 +133,27 @@ class ElasticSearchBuilder extends Builder
      */
     public function count()
     {
-
+        $params=$this->assembleSelect();
+        $result=static::getConnection()->count($params);
+        return $result;
     }
 
     public function max($column)
     {
-
+        $this->orders[]=[$column, 'desc'];
+        $this->take=1;
+        $params=$this->assembleSelect();
+        $result=static::getConnection()->search($params);
+        return $result;
     }
 
     public function min($column)
     {
-
+        $this->orders[]=[$column, 'asc'];
+        $this->take=1;
+        $params=$this->assembleSelect();
+        $result=static::getConnection()->search($params);
+        return $result;
     }
 
     public function sum($column)
@@ -127,13 +165,18 @@ class ElasticSearchBuilder extends Builder
     {
 		$body=[];
 
-		/** @var \Elasticsearch\Client $client **/
-		$client=static::getConnection();
+        if( !empty($this->selects) ) {
+            $body['_source']=$this->selects;
+        }
 
 		$where=$this->assembleWhere($this->where);
 		if( !empty($where) ) {
 			$body['query']['filtered']['filter']=$where;
 		}
+
+        if( !empty($this->groups) ) {
+            //https://www.elastic.co/guide/en/elasticsearch/reference/1.4/_executing_aggregations.html
+        }
 
 		if( !empty($this->orders) ) {
 			foreach($this->orders as $field=>$order) {
@@ -155,17 +198,13 @@ class ElasticSearchBuilder extends Builder
 			'type'=> $this->table,
 			'body'=>	$body
 		];
-		//$result=$client->search($param);
-		//return $result;
-        return $param;
+		return $param;
     }
 
     protected function assembleInsert()
     {
-		/** @var \Elasticsearch\Client $client **/
-		$client=static::getConnection();
 		$param=[
-			'routing'=>'',
+			'routing'=>$this->routing,
 			'index'=> $this->index,
 			'type' => $this->table,
 			'id'	  => $this->id,
@@ -173,16 +212,13 @@ class ElasticSearchBuilder extends Builder
 				$this->data
 			]
 		];
-		$result=$client->create($param);
-    	return $result;
+    	return $param;
 	}
 
     protected function assembleUpdate()
     {
-		/** @var \Elasticsearch\Client $client **/
-		$client=static::getConnection();
 		$param=[
-			'routing'=>'',
+			'routing'=>$this->routing,
 			'index'=>$this->index,
 			'type'=>$this->table,
 			'id'=>$this->id,
@@ -190,22 +226,18 @@ class ElasticSearchBuilder extends Builder
 				$this->data
 			]
 		];
-		$result=$client->update($param);
-    	return $result;
+    	return $param;
 	}
 
     protected function assembleDelete()
     {
-		/** @var \Elasticsearch\Client $client **/
-		$client=static::getConnection();
 		$param=[
-			'routing'=>'',
+			'routing'=>$this->routing,
 			'index'=>$this->index,
 			'type'=>$this->table,
 			'id'=>$this->id,
 		];
-		$result=$client->delete($param);
-		return $result;
+		return $param;
     }
 
 	/**
@@ -215,28 +247,45 @@ class ElasticSearchBuilder extends Builder
 	protected function assembleWhere($where)
 	{
 		$parts=[];
-        $relation=$where->getRelationOperate();
-		foreach($where->getSubWhere() as $subWhere) {
-			$childPart=[];
-			$childExp=$this->assembleWhere($subWhere);
-			if( $relation=='OR' ) {
-				$childPart['bool']['should'] = $childExp;
+		$operate=$where->getRelationOperate();
+		foreach($where->getSubWhere() as $subWhere)
+		{
+			$segment=$this->assembleWhere($subWhere);
+			if( $operate==Where::$relationAND )
+			{
+				$parts["must"][]=$segment;
 			}
-			else if( $relation=='AND' ) {
-				$childPart['bool']['must'] = $childExp;
+			else if( $operate==Where::$relationOR )
+			{
+				$parts["should"][]=$segment;
 			}
-			$parts[]=$childPart;
 		}
 
 		foreach($where->getSubCondition() as $condition)
 		{
-			$parts[]=$this->transformCondition($condition);
+			$segment=$this->buildCondition($condition);
+			if( $condition->isNegative() )
+			{
+				$parts["must_not"][]=$segment;
+			}
+			else if( $condition->relation==Where::$relationAND )
+			{
+				$parts["must"][]=$segment;
+			}
+			else if( $condition->relation==Where::$relationOR )
+			{
+				$parts["should"][]=$segment;
+			}
 		}
-
-		return $parts;
+		return ["bool"=>$parts];
 	}
 
-	protected function transformCondition(Condition $condition)
+	/**
+	*  build condition
+	 * @param $condition Condition
+	 * @return array
+	*/
+	protected function buildCondition(Condition $condition)
 	{
 		$express=[];
 		$values=$condition->values;
@@ -260,7 +309,7 @@ class ElasticSearchBuilder extends Builder
 				}
 				else
 				{
-					$express['must_not']['term']=[$name=>$values[0]];
+					$express['term']=[$name=>$values[0]];
 				}
 				break;
 			case '>':
@@ -279,11 +328,16 @@ class ElasticSearchBuilder extends Builder
 				$express['terms'][$name]=$values;
 				break;
 			case 'not in':
-				$express['must_not']['terms'][$name]=$values;
+				$express['terms'][$name]=$values;
 				break;
 			default:
 				break;
 		}
 		return $express;
 	}
+
+    private function getBaseParam()
+    {
+        return ;
+    }
 }
