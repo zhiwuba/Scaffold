@@ -33,8 +33,13 @@ class Application
     */
     protected $container;
 
-    public function __construct()
+    protected $rootPath;
+
+
+    public function __construct($rootPath)
     {
+        $this->rootPath=$rootPath;
+
         $this->container=new Container();
 
         $this->container->singleton('request', function(){
