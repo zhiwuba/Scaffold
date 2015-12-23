@@ -1,6 +1,7 @@
 <?php
 
 namespace Scaffold\Http;
+use Psr\Http\Message\UploadedFileInterface;
 
 
 /**
@@ -11,7 +12,7 @@ namespace Scaffold\Http;
  * state of the current instance and return an instance that contains the
  * changed state.
  */
-class  UploadedFile
+class  UploadedFile implements UploadedFileInterface
 {
     /**
     * @var Stream $stream

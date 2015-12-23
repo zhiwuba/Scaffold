@@ -22,7 +22,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     protected static $tableName;
 
     /**
-    *  @var Array
+    *  @var array
     */
     protected static $primaryKey=[];
 
@@ -44,7 +44,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
     /**
     *   instance with attribute.
-     * @param $attribute Array
+     * @param $attribute array
      * @return Model
     */
     public static function instance($attribute)
@@ -166,7 +166,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     *  get query object.
     * @return Builder
     */
-    public function getBuilder()
+    public static function getBuilder()
     {
         $query=new static::$builderClass(static::$tableName);
         $query->setModel(get_called_class());
@@ -175,20 +175,20 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
     /**
      * get primary id query.
-     * @param $data Array
+     * @param $data array
      * @return Where
      * @throws \Exception
     */
-    private function getIdQuery(array $data=[])
+    private static function getIdQuery(array $data=[])
     {
         if( empty($data) ) {
-            $data=&$this->data;
+            $data=&self::$data;
         }
 
         $where=new Where();
         foreach(static::$primaryKey as $key) {
             if( isset($data[$key]) ) {
-                $where->andWhere("$key=?", $data[$key]);
+                $where->andWhere($key, '=', $data[$key]);
             }
             else {
                 throw new \Exception("can't find primary key.");

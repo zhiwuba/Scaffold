@@ -19,13 +19,6 @@ abstract class Builder
         SORT_DESC=>'desc'
     ];
 
-    /**
-    * @var  \Scaffold\Database\Connector\Connector
-    */
-    protected static $connector;
-
-    protected static $connection;
-
     protected $scenario='select';
 
     protected $table;
@@ -57,34 +50,15 @@ abstract class Builder
         $this->where=new Where();
     }
 
-    public static function getConnector()
-    {
-        return static::$connector;
-    }
+	public static function setProfile($profile)
+	{
+		static::$profile=$profile;
+	}
 
-    /**
-	 *  set connector
-    * @param $connector \Scaffold\Database\Connector\Connector
-    */
-    public static function setConnector($connector)
-    {
-        static::$connector = $connector;
-        static::$connection=$connector->getDefaultConnection();
-    }
-
-    public static function getConnection()
-    {
-        return static::$connection;
-    }
-
-	/**
-	*  set connection
-	 * @param \Scaffold\Database\Connector\Connector $connection
-	*/
-    public static function setConnection($connection)
-    {
-        static::$connection=$connection;
-    }
+	public static function getProfile()
+	{
+		return static::$profile;
+	}
 
     /**
     *  CRUD
@@ -161,8 +135,8 @@ abstract class Builder
     *   condition
      * select()->where()->where();
      * select()->andWhere()->andWhere();
-     * select()->orWhere(function($query){ $query->where()->where()})->orWhere();
-     * select()->where()->where(function($query){$query->orWhere()->orWhere()});
+     * select()->orWhere(function(){ $this->where()->where()})->orWhere();
+     * select()->where()->where(function(){$this->orWhere()->orWhere()});
     */
     public function where()
     {

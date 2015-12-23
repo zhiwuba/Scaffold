@@ -10,8 +10,9 @@
 
 namespace Scaffold\Database\Query;
 
-class BuilderException extends  \Exception
+class BuilderException extends \Exception
 {
+
 }
 
 

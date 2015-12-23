@@ -12,6 +12,7 @@ namespace Scaffold\Database\Model;
 
 abstract class MysqlModel extends Model
 {
-    protected static $builderClass='\Scaffold\Database\Query\MysqlBuilder';
+    protected static $builderClass='Scaffold\Database\Query\MysqlBuilder';
+
 
 }

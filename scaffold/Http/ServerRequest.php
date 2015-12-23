@@ -2,6 +2,7 @@
 
 namespace Scaffold\Http;
 
+use Psr\Http\Message\ServerRequestInterface;
 use \Scaffold\Helper\Utility;
 
 /**
@@ -42,7 +43,7 @@ use \Scaffold\Helper\Utility;
  * be implemented such that they retain the internal state of the current
  * message and return an instance that contains the changed state.
  */
-class ServerRequest extends Request
+class ServerRequest extends Request implements ServerRequestInterface
 {
     /**
     *  @var array $get $_GET

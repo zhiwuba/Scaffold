@@ -4,10 +4,12 @@
  * User: liubingxia
  * Date: 15-8-7
  * Time: 下午3:05
+ * todo
  */
 
+namespace Scaffold\View;
 
-class Paginator
+class Pagination
 {
     public function make()
     {

@@ -12,5 +12,13 @@ namespace Scaffold\Database\Connector;
 
 class MongoConnector extends  Connector
 {
+    public function __construct()
+    {
 
+    }
+
+    public function getConnection($name = '')
+    {
+        // TODO: Implement getConnection() method.
+    }
 }

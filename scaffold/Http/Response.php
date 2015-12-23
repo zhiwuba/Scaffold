@@ -1,6 +1,7 @@
 <?php
 
 namespace Scaffold\Http;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Representation of an outgoing, server-side response.
@@ -17,7 +18,7 @@ namespace Scaffold\Http;
  * be implemented such that they retain the internal state of the current
  * message and return an instance that contains the changed state.
  */
-class Response extends Message
+class Response extends Message implements ResponseInterface
 {
     protected static $httpCodeMessage=[
         //Informational 1xx

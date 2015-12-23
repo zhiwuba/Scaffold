@@ -8,9 +8,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Scaffold\Cache\Connection;
 
-class MemcacheConnection extends CacheConnection
+class Push
 {
 
 }

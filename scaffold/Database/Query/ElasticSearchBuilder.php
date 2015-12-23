@@ -13,6 +13,16 @@ namespace Scaffold\Database\Query;
 class ElasticSearchBuilder extends Builder
 {
 	/**
+	 * @var \ElasticSearch\Client
+	 */
+	public static $connection;
+
+	/**
+	 * @var Profile
+	 */
+	public static $profile;
+
+	/**
 	* @var string
 	*/
 	protected $routing;
@@ -60,8 +70,16 @@ class ElasticSearchBuilder extends Builder
      */
     public static function getConnection()
     {
-        return parent::getConnection();
+        return static::$connection;
     }
+
+	/**
+	 * @param $connection \Elasticsearch\Client
+	 */
+	public static function setConnection($connection)
+	{
+		static::$connection=$connection;
+	}
 
     public function execute()
     {
@@ -86,11 +104,19 @@ class ElasticSearchBuilder extends Builder
         return $result;
     }
 
+	public function search()
+	{
+		$connection=static::getConnection();
+		$params=$this->assemble();
+		$result=$connection->search($params);
+		return $result;
+	}
+
     public function fetch()
 	{
 		if ( $this->scenario==='select' )
         {
-			$result = $this->assemble();
+			$result = $this->search();
 			return $result;
 		}
 		else
@@ -118,8 +144,7 @@ class ElasticSearchBuilder extends Builder
     {
         if( $this->scenario==='select' )
         {
-            $params=$this->assembleSelect();
-            $result=static::getConnection()->search($params);
+			$result=$this->search();
             return $result;
         }
         else
@@ -142,8 +167,7 @@ class ElasticSearchBuilder extends Builder
     {
         $this->orders[]=[$column, 'desc'];
         $this->take=1;
-        $params=$this->assembleSelect();
-        $result=static::getConnection()->search($params);
+		$result=$this->search();
         return $result;
     }
 
@@ -151,9 +175,8 @@ class ElasticSearchBuilder extends Builder
     {
         $this->orders[]=[$column, 'asc'];
         $this->take=1;
-        $params=$this->assembleSelect();
-        $result=static::getConnection()->search($params);
-        return $result;
+		$result=$this->search();
+		return $result;
     }
 
     public function sum($column)
@@ -192,52 +215,32 @@ class ElasticSearchBuilder extends Builder
 			$body['size']=$this->take;
 		}
 
-		$param=[
-			'routing'=>$this->routing,
-			'index'=> $this->index,
-			'type'=> $this->table,
-			'body'=>	$body
-		];
-		return $param;
+		$params=$this->getBaseParam();
+		$params['body']=$body;
+		return $params;
     }
 
     protected function assembleInsert()
     {
-		$param=[
-			'routing'=>$this->routing,
-			'index'=> $this->index,
-			'type' => $this->table,
-			'id'	  => $this->id,
-			'body'=>[
-				$this->data
-			]
-		];
-    	return $param;
+		$params=$this->getBaseParam();
+		$params['id']=$this->id;
+		$params['body']=$this->data;
+		return $params;
 	}
 
     protected function assembleUpdate()
     {
-		$param=[
-			'routing'=>$this->routing,
-			'index'=>$this->index,
-			'type'=>$this->table,
-			'id'=>$this->id,
-			'body'=>[
-				$this->data
-			]
-		];
-    	return $param;
+		$params=$this->getBaseParam();
+		$params['id']=$this->id;
+		$params['body']=$this->data;
+		return $params;
 	}
 
     protected function assembleDelete()
     {
-		$param=[
-			'routing'=>$this->routing,
-			'index'=>$this->index,
-			'type'=>$this->table,
-			'id'=>$this->id,
-		];
-		return $param;
+		$params=$this->getBaseParam();
+		$params['id']=$this->id;
+		return $params;
     }
 
 	/**
@@ -267,6 +270,10 @@ class ElasticSearchBuilder extends Builder
 			if( $condition->isNegative() )
 			{
 				$parts["must_not"][]=$segment;
+			}
+			else if( $condition->isFuzzy() )
+			{
+				$parts['query']=$segment;
 			}
 			else if( $condition->relation==Where::$relationAND )
 			{
@@ -338,6 +345,11 @@ class ElasticSearchBuilder extends Builder
 
     private function getBaseParam()
     {
-        return ;
+		$param=[
+			'routing'=>$this->routing,
+			'index'=>$this->index,
+			'type'=>$this->table,
+		];
+        return $param;
     }
 }

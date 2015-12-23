@@ -8,6 +8,11 @@
 
 namespace Scaffold\Application;
 
+use Scaffold\Database\Connector\CassandraConnector;
+use Scaffold\Database\Connector\ElasticSearchConnector;
+use Scaffold\Database\Model\ModelException;
+use Scaffold\Database\Query\CassandraBuilder;
+use Scaffold\Database\Query\ElasticSearchBuilder;
 use Scaffold\Database\Query\MysqlBuilder;
 use Scaffold\Database\Connector\MysqlConnector;
 use Scaffold\Helper\Container;
@@ -101,11 +106,40 @@ class Application
     /**
     * source mysql config.
     */
-    public function sourceMysqlFile($filePath)
+    public function initMysqlDB($filePath)
     {
-        $config=require_once "$filePath";
+        $config=require_once $filePath;
         $connector=MysqlConnector::loadConfig($config);
         MysqlBuilder::setConnector($connector);
+    }
+
+	public function initElasticSearch($filePath)
+	{
+		$config=require_once $filePath;
+		$connector=ElasticSearchConnector::loadConfig($config);
+		ElasticSearchBuilder::setConnection($connector->getConnection());
+	}
+
+	public function initCassandraDB($filePath)
+	{
+		$config=require_once $filePath;
+		$connector=CassandraConnector::loadConfig($config);
+		CassandraBuilder::setConnection($connector->getConnection());
+	}
+
+	public function initRedisDB($filePath)
+	{
+		$config=require_once $filePath;
+	}
+
+	public function initMongoDB($filePath)
+	{
+		$config=require_once $filePath;
+	}
+
+    public function initRabbitMQ($filePath)
+    {
+        $config=require_once $filePath;
     }
 
     /**
@@ -142,10 +176,21 @@ class Application
         echo $this->response->getBody();
     }
 
+	/**
+	 * render exception to front.
+	 * @param $e \Exception
+	 */
+	public function renderException($e)
+	{
+		echo $e->getMessage() . '<br>';
+		echo $e->getLine() . '<br>';
+		print_r($e->getTrace());
+	}
+
     /**
     *  run , active all process.
     */
-    public function  run()
+    public function run()
     {
         try
         {
@@ -156,13 +201,15 @@ class Application
             if (function_exists("fastcgi_finish_request")) {
                 fastcgi_finish_request();
             }
-
         }
+		catch(ModelException $e)
+		{
+
+		}
         catch(\Exception $e)
         {
-            echo $e->getMessage() . '<br>';
-            echo $e->getLine() . '<br>';
-            print_r($e->getTrace());
+			$this->logger->error($e->getMessage());
+			$this->renderException($e);
             exit;
         }
     }

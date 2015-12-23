@@ -1,6 +1,7 @@
 <?php
 
 namespace Scaffold\Http;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Value object representing a URI.
@@ -22,7 +23,7 @@ namespace Scaffold\Http;
  *
  * @link http://tools.ietf.org/html/rfc3986 (the URI specification)
  */
-class Uri
+class Uri implements UriInterface
 {
     protected $scheme;
     protected $host;

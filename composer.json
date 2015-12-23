@@ -2,7 +2,11 @@
   "require": {
     "phpunit/phpunit": "^4.8",
     "elasticsearch/elasticsearch": "^2.0",
-    "psr/cache": "^1.0"
+    "duoshuo/php-cassandra": "^0.5.2",
+    "psr/http-message": "^1.0",
+    "psr/cache": "^1.0",
+    "psr/log": "^1.0",
+    "predis/predis": "^1.0"
   },
   "autoload":{
     "psr-4":{
@@ -12,6 +16,9 @@
        "app/Controllers",
        "app/Models"
      ]
-  }
-
+  },
+  "repositories": [
+  	{"type": "composer", "url": "http://packagist.phpcomposer.com"},
+  	{"packagist": false}
+  ]
 }

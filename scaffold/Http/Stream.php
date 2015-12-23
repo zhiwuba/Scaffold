@@ -1,6 +1,7 @@
 <?php
 
 namespace Scaffold\Http;
+use Psr\Http\Message\StreamInterface;
 
 
 /**
@@ -10,7 +11,7 @@ namespace Scaffold\Http;
  * a wrapper around the most common operations, including serialization of
  * the entire stream to a string.
  */
-class Stream
+class Stream implements StreamInterface
 {
     /**
     *  @var resource $resource

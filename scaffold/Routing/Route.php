@@ -1,9 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-8-7
- * Time: 下午7:57
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Scaffold\Routing;
@@ -146,7 +148,7 @@ class Route
             //TODO
         }
         else if( is_callable($this->callback) )
-        {   //function or closure
+        {
             call_user_func_array($this->callback, $this->params);
         }
         else

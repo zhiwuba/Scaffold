@@ -7,6 +7,8 @@
  */
 
 namespace Scaffold\Http;
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * HTTP messages consist of requests from a client to a server and responses
@@ -20,10 +22,10 @@ namespace Scaffold\Http;
  * @link http://www.ietf.org/rfc/rfc7230.txt
  * @link http://www.ietf.org/rfc/rfc7231.txt
  */
-abstract class Message
+abstract class Message implements MessageInterface
 {
     /**
-    *  @var Array
+    *  @var array
     */
     protected $headers=[];
 
@@ -274,12 +276,12 @@ abstract class Message
      * This method MUST be implemented in such a way as to retain the
      * immutability of the message, and MUST return a new instance that has the
      * new body stream.
-     *
+     *I
      * @param Stream $body Body.
      * @return self
      * @throws \InvalidArgumentException When the body is not valid.
      */
-    public function withBody(Stream $body)
+    public function withBody(StreamInterface $body)
     {
         if( $body!==NULL )
         {

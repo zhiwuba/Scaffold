@@ -10,7 +10,7 @@
 
 namespace Scaffold\Cache;
 
-class CacheException implements \Psr\Cache\CacheException
+class CacheException extends \Exception implements \Psr\Cache\CacheException
 {
 
 }

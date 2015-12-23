@@ -12,7 +12,7 @@ namespace Scaffold\Database\Model;
 
 abstract class MongoModel extends Model
 {
-    protected static $builderClass='\Scaffold\Database\Query\MongoBuilder';
+    protected static $builderClass='MongoBuilder';
 
 }
 

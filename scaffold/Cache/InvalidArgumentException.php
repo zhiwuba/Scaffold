@@ -11,7 +11,7 @@
 namespace Scaffold\Cache;
 
 
-class InvalidArgumentException implements \Psr\Cache\InvalidArgumentException
+class InvalidArgumentException extends \Exception implements \Psr\Cache\InvalidArgumentException
 {
 
 }

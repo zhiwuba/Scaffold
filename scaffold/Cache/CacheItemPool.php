@@ -11,25 +11,29 @@ namespace Scaffold\Cache;
 
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
-use Scaffold\Cache\Connection\CacheConnection;
+use Scaffold\Cache\Adapter\CacheAdapter;
 
 
 class CacheItemPool implements CacheItemPoolInterface
 {
     /**
-     * @var CacheConnection
+     * @var CacheItemInterface[]
      */
-    protected static $connection;
+    protected $deferItems;
 
-    public static function getConnection()
+    /**
+     * @var CacheAdapter
+     */
+    protected static $adapter;
+
+    public static function getAdapter()
     {
-        return static::$connection;
+        return static::$adapter;
     }
 
-    public static function setConnection($connection)
+    public static function setAdapter($adapter)
     {
-        static::$connection=$connection;
+        static::$adapter=$adapter;
     }
 
     /**
@@ -37,9 +41,23 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function getItem($key)
     {
-        $value=static::$connection->get($key);
-        $item=new CacheItem($key, $value);
-        return $item;
+        if( $this->isValidKey($key) )
+        {
+            if( static::$adapter->has($key) )
+            {
+                $value=static::$adapter->get($key);
+                $item=new CacheItem(true, $key, $value);
+            }
+            else
+            {
+                $item=new CacheItem(false, $key, null);
+            }
+            return $item;
+        }
+        else
+        {
+            throw new InvalidArgumentException("$key is not  a legal value.");
+        }
     }
 
     /**
@@ -47,7 +65,40 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function getItems(array $keys = array())
     {
-        static::$connection->get();
+        if( empty($keys) )
+        {   // null keys
+            foreach(static::$adapter->scan() as $key=> $value)
+            {
+                $item=new CacheItem(true, $key, $value);
+                yield $item;
+            }
+        }
+        else
+        {
+            //todo multi ?
+            $items=[];
+            foreach($keys as $key)
+            {
+                if($this->isValidKey($key))
+                {
+                    if( static::$adapter->has($key) )
+                    {
+                        $value=static::$adapter->get($key);
+                        $items[$key]=new CacheItem(true, $key, $value);
+                    }
+                    else
+                    {
+                        $items[$key]=new CacheItem(false, $key, null);
+                    }
+                }
+                else
+                {
+                    throw new InvalidArgumentException("$key is not a legal value.");
+                }
+            }
+
+            return $items;
+        }
     }
 
     /**
@@ -55,7 +106,14 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function hasItem($key)
     {
-        static::$connection->has();
+        if( $this->isValidKey($key) )
+        {
+            return static::$adapter->has($key);
+        }
+        else
+        {
+            throw new InvalidArgumentException("$key is not a legal value.");
+        }
     }
 
     /**
@@ -63,7 +121,7 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function clear()
     {
-        static::$connection->clear();
+        return static::$adapter->clear();
     }
 
     /**
@@ -71,7 +129,14 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function deleteItem($key)
     {
-
+        if( $this->isValidKey($key) )
+        {
+            return static::$adapter->delete([$key]);
+        }
+        else
+        {
+            throw new InvalidArgumentException("$key is not a legal value.");
+        }
     }
 
     /**
@@ -79,7 +144,15 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function deleteItems(array $keys)
     {
+        foreach($keys as $key)
+        {
+            if( !$this->isValidKey($key) )
+            {
+                throw new InvalidArgumentException("$key is not a legal value.");
+            }
+        }
 
+        return static::$adapter->delete($keys);
     }
 
     /**
@@ -87,7 +160,9 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function save(CacheItemInterface $item)
     {
-
+        $key=$item->getKey();
+        $value=$item->get();
+        return static::$adapter->set($key, $value); //todo
     }
 
     /**
@@ -95,7 +170,7 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function saveDeferred(CacheItemInterface $item)
     {
-
+        $this->deferItems[]=$item;
     }
 
     /**
@@ -103,7 +178,28 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     public function commit()
     {
+        foreach($this->deferItems as $item)
+        {
+            if( static::$adapter->set($item->getKey(), $item->get()) )
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
+    /**
+     * valid key
+     *
+     * @param $key
+     * @return bool
+     */
+    protected function isValidKey($key)
+    {
+        if( is_string($key) && preg_match('[a-zA-Z0-9_\.]+', $key) )
+            return true;
+        else
+            return false;
     }
 
 }

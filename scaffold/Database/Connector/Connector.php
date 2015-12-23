@@ -27,8 +27,9 @@ abstract class Connector
 
 	/**
 	 * get default connection.
+	 * @param $name string
 	 * @return Object
 	 */
-	abstract public function getDefaultConnection();
+	abstract public function getConnection($name='');
 
 }

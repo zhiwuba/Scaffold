@@ -1,24 +1,19 @@
 <?php
-/**
- * User: explorer
- * Date: 2015/8/5
- * Time: 23:39
- */
 
-
-set_include_path(implode(PATH_SEPARATOR, [
-    get_include_path(),
-]));
+require_once '../app/Configs/app.php';
 
 require_once '../vendor/autoload.php';
 
-define('ROOT_PATH', dirname(__DIR__));
+//$redisConnection=new \Predis\Client();
 
+//\Scaffold\Cache\CacheItemPool::setAdapter(new \Scaffold\Cache\Adapter\RedisAdapter($redisConnection));
 
-$app=new \Scaffold\Application\Application();
+$app=new \Scaffold\Application\Application('');
 
-$app->sourceMysqlFile(ROOT_PATH . 'app/Configs/mysql.php');
+$app->initRedisDB(APP_PATH . '/Configs/redis.php');
+$app->initMysqlDB(APP_PATH . '/Configs/mysql.php');
+$app->initElasticSearch(APP_PATH . '/Configs/elasticsearch.php');
 
-$app->sourceRouteFile(ROOT_PATH . '/app/route.php');
+$app->sourceRouteFile(APP_PATH . '/route.php');
 
 $app->run();

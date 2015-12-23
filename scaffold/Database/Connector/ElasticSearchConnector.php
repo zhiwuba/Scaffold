@@ -28,7 +28,7 @@ class ElasticSearchConnector extends Connector
 	 * get default connection.
 	 * @return \Elasticsearch\Client
 	 */
-	public function getDefaultConnection()
+	public function getConnection()
 	{
 		return $this->client;
 	}

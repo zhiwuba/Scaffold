@@ -8,10 +8,29 @@
  * file that was distributed with this source code.
  */
 
+namespace Scaffold\Database\Profile;
 
-abstract class Profile
+class Profile
 {
+	/**
+	 * @var array
+	 */
+	protected $logs=[];
 
+	/**
+	 * Logs with an arbitrary level.
+	 *
+	 * @param string $message
+	 * @return null
+	 */
+	public function log($message)
+	{
+		$logs[]=$message;
+	}
+
+	public function getLogs()
+	{
+		return $this->logs;
+	}
 }
-
 

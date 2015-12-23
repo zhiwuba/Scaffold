@@ -8,6 +8,22 @@
  * file that was distributed with this source code.
  */
 
-class CassandraConnection {
+namespace Scaffold\Database\Connector;
 
+class CassandraConnector extends Connector
+{
+	/**
+	 * get default connection.
+	 * @param $name string
+	 * @return Object
+	 */
+	public function getConnection($name = '')
+	{
+		return NULL;
+	}
+
+	public static function loadConfig($config)
+	{
+		return new static();
+	}
 }

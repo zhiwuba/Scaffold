@@ -14,7 +14,7 @@ class Utility
     /**
     * whether array is normal or not.
      * ['a', 'b', 'c', 'd']
-    * @param Array $array
+    * @param array $array
     * @return bool
     */
     public static function isNormalArray(&$array)
@@ -25,7 +25,7 @@ class Utility
 
     /**
     * whether array is assoc or not.
-     * @param Array $array
+     * @param array $array
      * @return bool
      */
     public static function isAssocArray(&$array)
@@ -35,8 +35,8 @@ class Utility
 
     /**
     *  flatten array
-     * @param Array $array
-     * @return Array
+     * @param array $array
+     * @return array
     */
     public static function arrayFlatten(&$array)
     {
@@ -57,8 +57,8 @@ class Utility
 
     /**
      * flatten an array and use dot to represent deep.
-    *  @param Array $array
-     * @return Array
+    *  @param array $array
+     * @return array
     */
     public static function arrayDot(&$array, $prefix='')
     {
@@ -88,8 +88,8 @@ class Utility
     /**
     *  whether array1 is array2 's subset or not.
      * different from array_diff_assoc().
-     * @param Array $array1
-     * @param Array $array2
+     * @param array $array1
+     * @param array $array2
      * @return bool
     */
     public static function isSubSet($array1, $array2)
@@ -137,6 +137,35 @@ class Utility
             return '_' . strtolower($matches[0]);
         }, $input );
         return $result;
+    }
+
+	/**
+	 * get cost time of function
+	 */
+	public static function functionCostTime($callback)
+	{
+		$tm1=microtime(true)*1000;
+		$return=$callback();
+		$cost=(int)(microtime(true)*1000 - $tm1);
+		return array($cost, $return);
+	}
+
+    /**
+     *  get the second interval of two datetime object.
+     *
+     * @param \DateTime $time1
+     * @param \DateTime $time2
+     * @return int
+     */
+    public static function dateTimeInterval(\DateTime $time1, \DateTime $time2)
+    {
+        $interval=$time1->diff($time2);
+        return Utility::dateIntervalToSec($interval);
+    }
+
+    public static function dateIntervalToSec(\DateInterval $interval)
+    {
+        return $interval->days*86400+$interval->h*3600 +$interval->m*60+$interval->s;
     }
 
 }

@@ -14,23 +14,24 @@ namespace Scaffold\Database\Connector;
 class MysqlConnector extends Connector
 {
     /**
-    *  @var  Array  all connector.
+    *  @var array
     * [
     *   'name'=>['host'=>'' , 'type'=>'read', 'connection'=>$connection] ,
     *   'name'=>['host'=>'', 'type'=>'write', 'connection'=>$connection]
     * ]
     */
-    protected $connectors=[];
+    protected $connections=[];
 
 
     /**
+	 * global config.
     * @var array
     */
     protected $config;
 
 
     /**
-    * @param $configs Array.
+    * @param $configs array.
     */
     public function __construct($configs)
     {
@@ -41,79 +42,50 @@ class MysqlConnector extends Connector
         $writes=isset($configs['write'])? $configs['write'] : [];
         foreach($reads as $name=>$host)
         {
-            $this->connectors[$name]=[
-                'host'=>$host,
-                'type'=>'read',
-                'connection'=>NULL
-            ];
+			$connection=new \stdClass();
+			$connection->host=$host;
+			$connection->type='read';
+			$connection->connection=NULL;
+            $this->connections[$name]=$connection;
         }
         foreach($writes as $name=>$host)
         {
-            $this->connectors[$name]=[
-                'host'=>$host,
-                'type'=>'write',
-                'connection'=>NULL
-            ];
+			$connection=new \stdClass();
+			$connection->host=$host;
+			$connection->type='write';
+			$connection->connection=NULL;
+            $this->connections[$name]=$connection;
         }
     }
 
-    public function getReadConnector()
+    public function getReadConnection()
     {
         return ;
     }
 
-    public function getWriteConnector()
+    public function getWriteConnection()
     {
         return ;
     }
 
-    public function getDefaultConnection()
+    public function getConnection($name='')
     {
-        if( count($this->connectors)>0 )
-        {
-            $connector=&current($this->connectors);
-            if( isset($connector['connection']) && $connector['connection'] instanceof \PDO )
-            {
-                return $connector['connection'];
-            }
-            else
-            {
-                $config=array_merge($this->config, ['host'=>$connector['host']]);
-                $connector['connection']=$this->connect($config);
-                return $connector['connection'];
-            }
-        }
-        else
-        {
-            return NULL;
-        }
-    }
-
-    /**
-    *  switch connection.
-    * @param $name string
-    * @return \PDO
-    */
-    public function switchConnection($name)
-    {
-        foreach($this->connectors as &$connector)
-        {
-            if( $connector['name']===$name )
-            {
-                if( !isset($connector['connection']) || !($connector['connection'] instanceof \PDO) )
-                {
-                    $config=array_merge($this->config, ['host'=>$connector['host']]);
-                    $connector['connection']=$this->connect($config);
-                }
-                return $connector['connection'];
-            }
-        }
-        return null;
-    }
+		$connection=empty($name)? current($this->connections) : $this->connections[$name];
+		if( isset($connection->connection) && $connection->connection instanceof \PDO )
+		{
+			return $connection->connection;
+		}
+		else
+		{
+			$config=array_merge($this->config, ['host'=>$connection->host]);
+			$connection->connection=$this->connect($config);
+			return $connection->connection;
+		}
+	}
 
     /**
      *  create connection
-     * @param $config Array
+     * @param $config array
      * @return \PDO
      */
     public function connect($config)

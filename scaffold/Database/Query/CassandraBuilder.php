@@ -12,31 +12,58 @@ namespace Scaffold\Database\Query;
 
 class CassandraBuilder extends Builder
 {
+	public static $connection;
+
+	public static $profile;
+
+	/**
+	 * @return
+	 */
+	public static function getConnection()
+	{
+		return static::$connection;
+	}
+
+	/**
+	 *  set connection
+	 * @param \Scaffold\Database\Connector\Connector $connection
+	 */
+	public static function setConnection($connection)
+	{
+		static::$connection=$connection;
+	}
+
     /**
      *  trigger
      */
     public function execute()
     {
+
     }
 
     public function fetch()
     {
+
     }
 
     public function fetchRow()
     {
+
     }
 
     public function fetchPair()
     {
+
     }
 
     public function fetchGroup()
     {
+
     }
 
     public function fetchAll()
     {
+
     }
 
     /**
@@ -44,34 +71,42 @@ class CassandraBuilder extends Builder
      */
     public function count()
     {
+
     }
 
     public function max($column)
     {
+
     }
 
     public function min($column)
     {
+
     }
 
     public function sum($column)
     {
+
     }
 
     protected function assembleSelect()
     {
+
     }
 
     protected function assembleInsert()
     {
+
     }
 
     protected function assembleUpdate()
     {
+
     }
 
     protected function assembleDelete()
     {
+
     }
 
 }

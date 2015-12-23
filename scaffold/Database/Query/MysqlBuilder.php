@@ -10,8 +10,25 @@
 
 namespace Scaffold\Database\Query;
 
+use Scaffold\Helper\Utility;
+
 class MysqlBuilder extends Builder
 {
+	/**
+	 * @var  \Scaffold\Database\Connector\MysqlConnector
+	 */
+	protected static $connector;
+
+	/**
+	 * @var \PDO
+	 */
+	protected static $connection;
+
+	/**
+	 * @var \Scaffold\Database\Profile\Profile
+	 */
+	protected static $profile;
+
     /**
      * @var array
      */
@@ -34,23 +51,42 @@ class MysqlBuilder extends Builder
     */
     public function choose($name)
     {
-        if( empty($name) ) {
-            $connection=static::$connector->getDefaultConnection();
-        }
-        else {
-            $connection=static::$connector->switchConnection($name);
-        }
+		$connection=static::$connector->getConnection($name);
         $this->setConnection($connection);
         return $this;
     }
 
-    /**
-     * @return  \PDO
-     */
-    public static function getConnection()
-    {
-        return parent::getConnection();
-    }
+	public static function getConnector()
+	{
+		return static::$connector;
+	}
+
+	/**
+	 *  set connector
+	 * @param $connector \Scaffold\Database\Connector\MysqlConnector
+	 */
+	public static function setConnector($connector)
+	{
+		static::$connector = $connector;
+		static::$connection=$connector->getConnection();
+	}
+
+	/**
+	 * @return  \PDO
+	 */
+	public static function getConnection()
+	{
+		return static::$connection;
+	}
+
+	/**
+	 *  set connection
+	 * @param \Scaffold\Database\Connector\Connector $connection
+	 */
+	public static function setConnection($connection)
+	{
+		static::$connection=$connection;
+	}
 
     /**
      *  Cascade operate
@@ -409,11 +445,11 @@ class MysqlBuilder extends Builder
 		$conditionsExp=[];
 		foreach($where->getSubCondition() as $condition)
 		{
-			$conditionsExp[]=$condition->name;
+			$conditionsExp[]=$this->assembleCondition($condition);
 			$bindings=array_merge($bindings, $condition->values);
 		}
 
-		$operate=str_pad($where->getRelationOperate(),1,  ' ', STR_PAD_BOTH );
+		$operate=' ' . $where->getRelationOperate() . ' ';
 		$parts[]=implode($operate, $conditionsExp);
 
 		$parts=array_filter($parts, function($part){
@@ -424,5 +460,23 @@ class MysqlBuilder extends Builder
 
 		return array($expression, $bindings);
 	}
+
+    protected function assembleCondition(Condition $condition)
+    {
+        $parts=[];
+        $parts[]=$condition->name;
+        $parts[]=$condition->operate;
+        if(in_array($condition->operate, ['in', 'not in']))
+        {
+            $parts[]='(' . implode(',', array_fill(0, count($condition->values), '?')) . ')';
+        }
+        else
+        {
+            $parts[]='?';
+        }
+
+        $expression=implode(' ', $parts);
+        return $expression;
+    }
 
 }

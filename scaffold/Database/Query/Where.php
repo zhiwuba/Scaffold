@@ -17,7 +17,7 @@ class Condition
 	/**
 	* @var array
 	*/
-	public static $supportOperate=[ '=',  '!=', '>=', '>', '<=', '<', 'in' , 'not in'];
+	public static $supportOperate=[ '=',  '!=', '>=', '>', '<=', '<', 'in' , 'not in', 'like'];
 
     /**
      *  @var string
@@ -30,7 +30,7 @@ class Condition
 	public $operate;
 
     /**
-     *  @var Array placeholder value.
+     *  @var array placeholder value.
      */
     public $values=[];
 
@@ -62,6 +62,11 @@ class Condition
 		$ret=in_array($this->operate, ['!=',  'not in']);
 		return $ret;
 	}
+
+    public function isFuzzy()
+    {
+        return $this->operate === 'like';
+    }
 
 	/**
 	 * check whether support this operate or not.

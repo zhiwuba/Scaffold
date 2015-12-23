@@ -1,6 +1,8 @@
 <?php
 
 namespace Scaffold\Http;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Representation of an outgoing, client-side request.
@@ -21,7 +23,7 @@ namespace Scaffold\Http;
  * be implemented such that they retain the internal state of the current
  * message and return an instance that contains the changed state.
  */
-class Request extends Message
+class Request extends Message implements RequestInterface
 {
     const METHOD_HEAD   = 'HEAD';
     const METHOD_GET      = 'GET';
@@ -176,9 +178,8 @@ class Request extends Message
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return self
      */
-    public function withUri(Uri $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false)
     {
-
         return $this;
     }
 

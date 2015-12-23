@@ -9,18 +9,21 @@
 
 namespace Scaffold\Cache;
 use Psr\Cache;
+use Scaffold\Helper\Utility;
 
 class CacheItem implements Cache\CacheItemInterface
 {
+    protected $isHit;
     protected $key;
     protected $value;
+    protected $ttl=0;
 
-    public function __construct($key,$value)
+    public function __construct($hit, $key,$value)
     {
+        $this->isHit=$hit;
         $this->key=$key;
         $this->value=$value;
     }
-
 
     /**
      * @inheritDoc
@@ -36,9 +39,9 @@ class CacheItem implements Cache\CacheItemInterface
     public function get()
     {
         if( $this->isHit() )
-        {
-            return ;
-        }
+            return $this->value;
+        else
+            return null;
     }
 
     /**
@@ -46,7 +49,7 @@ class CacheItem implements Cache\CacheItemInterface
      */
     public function isHit()
     {
-        array_key_exists();
+        return $this->isHit;
     }
 
     /**
@@ -54,7 +57,8 @@ class CacheItem implements Cache\CacheItemInterface
      */
     public function set($value)
     {
-
+        $this->value=$value;
+        return $this; //todo return what?
     }
 
     /**
@@ -62,7 +66,17 @@ class CacheItem implements Cache\CacheItemInterface
      */
     public function expiresAt($expiration)
     {
-
+        if( $expiration instanceof \DateTime )
+        {
+            $now=new \DateTime();
+            $second=Utility::dateTimeInterval($now, $expiration);
+            $this->ttl=$second;
+        }
+        else if( $expiration ==='none' || $expiration===null)
+        {   //permanent
+            $this->ttl=$expiration;
+        }
+        return $this;
     }
 
     /**
@@ -70,7 +84,16 @@ class CacheItem implements Cache\CacheItemInterface
      */
     public function expiresAfter($time)
     {
-
+        if( $time instanceof \DateInterval )
+        {
+            $sec=Utility::dateIntervalToSec($time);
+            $this->ttl=$sec;
+        }
+        else if( is_integer($time) || $time===null || $time==='none' )
+        {
+            $this->ttl=$time;
+        }
+        return $this;
     }
 
 }
