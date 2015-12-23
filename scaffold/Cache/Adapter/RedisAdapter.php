@@ -17,19 +17,14 @@ class RedisAdapter extends CacheAdapter
      */
     protected $connection;
 
-    /**
-     * @var int
-     */
-    protected $cursor=null;
-
 
     /**
      * @inheritDoc
      */
     public function get($key)
     {
-        $value=$this->connection->get($key);
-        return $value;
+        $body=$this->connection->get($key);
+        return $this->unserializeValue($body);
     }
 
     /**
@@ -37,8 +32,9 @@ class RedisAdapter extends CacheAdapter
      */
     public function set($key, $value)
     {
-        $ret=$this->connection->set($key, $value);
-        return $ret; //todo
+        $body=$this->serializeValue($value);
+        $ret=$this->connection->set($key, $body);
+        return strval($ret)==='OK'? true : false;
     }
 
     /**
@@ -46,8 +42,11 @@ class RedisAdapter extends CacheAdapter
      */
     public function multiGet(array $keys)
     {
-        $values=$this->connection->mget($keys);
-        return $values; //todo
+        $rawValues=$this->connection->mget($keys);
+        $values=array_map(function($value){
+            return $this->unserializeValue($value);
+        }, $rawValues);
+        return array_combine($keys, $values);
     }
 
     /**
@@ -55,8 +54,11 @@ class RedisAdapter extends CacheAdapter
      */
     public function multiSet(array $pairs)
     {
+        array_walk($pairs, function(&$value, $key){
+            $value=$this->serializeValue($value);
+        });
         $ret=$this->connection->mset($pairs);
-        return $ret; //todo
+        return strval($ret)==='OK'? true : false;
     }
 
     /**
@@ -108,16 +110,17 @@ class RedisAdapter extends CacheAdapter
      */
     public function scan()
     {
-        if( $this->cursor===0 )
+        $cursor=null;
+        while( $cursor!==0 )
         {
-            $this->cursor=null;
-            return [];
+            $pos=$cursor===null? 0 : $cursor;
+            list($cursor, $keys)=$this->connection->scan($pos);
+            $pairs=$this->multiGet($keys);
+            foreach($pairs as $key=>$value)
+            {
+                yield $key=>$value;
+            }
         }
-
-        $pos=$this->cursor===null? 0 : $this->cursor;
-        $ret=$this->connection->scan($pos);
-        $this->cursor=$ret[0];
-        return $ret[1];
     }
 
 }

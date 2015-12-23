@@ -1,11 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-8-25
- * Time: 下午9:58
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
-
 
 namespace Scaffold\Cache;
 use Psr\Cache;
@@ -18,7 +19,7 @@ class CacheItem implements Cache\CacheItemInterface
     protected $value;
     protected $ttl=0;
 
-    public function __construct($hit, $key,$value)
+    public function __construct($key,$value, $hit=false)
     {
         $this->isHit=$hit;
         $this->key=$key;
@@ -42,6 +43,11 @@ class CacheItem implements Cache\CacheItemInterface
             return $this->value;
         else
             return null;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
     }
 
     /**

@@ -42,7 +42,7 @@ abstract class CacheAdapter
      *  get value of keys from cache
      *
      * @param array $keys
-     * @return mixed
+     * @return array
      */
     abstract public function multiGet(array $keys);
 
@@ -107,7 +107,7 @@ abstract class CacheAdapter
      */
     public function serializeValue($value)
     {
-        //todo
+        return serialize($value);
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class CacheAdapter
      */
     public function unserializeValue($content)
     {
-        //todo
+        return unserialize($content);
     }
 
 }

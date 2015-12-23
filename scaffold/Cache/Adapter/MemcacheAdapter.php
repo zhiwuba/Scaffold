@@ -62,7 +62,7 @@ class MemcacheAdapter extends CacheAdapter
     /**
      * @inheritDoc
      */
-    public function expire($time)
+    public function expire($key, $time)
     {
         // TODO: Implement expire() method.
     }

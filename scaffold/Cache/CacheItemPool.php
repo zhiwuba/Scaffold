@@ -1,11 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liubingxia
- * Date: 15-8-25
- * Time: 下午9:58
+/*
+ * This file is part of the Scaffold package.
+ *
+ * (c) bingxia liu  <xiabingliu@163.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
-
 
 namespace Scaffold\Cache;
 
@@ -17,7 +18,7 @@ use Scaffold\Cache\Adapter\CacheAdapter;
 class CacheItemPool implements CacheItemPoolInterface
 {
     /**
-     * @var CacheItemInterface[]
+     * @var CacheItem[]
      */
     protected $deferItems;
 
@@ -46,11 +47,11 @@ class CacheItemPool implements CacheItemPoolInterface
             if( static::$adapter->has($key) )
             {
                 $value=static::$adapter->get($key);
-                $item=new CacheItem(true, $key, $value);
+                $item=new CacheItem($key, $value, true);
             }
             else
             {
-                $item=new CacheItem(false, $key, null);
+                $item=new CacheItem($key, null);
             }
             return $item;
         }
@@ -69,14 +70,12 @@ class CacheItemPool implements CacheItemPoolInterface
         {   // null keys
             foreach(static::$adapter->scan() as $key=> $value)
             {
-                $item=new CacheItem(true, $key, $value);
-                yield $item;
+                $item=new CacheItem($key, $value, true);
+                yield $key=>$item;
             }
         }
         else
         {
-            //todo multi ?
-            $items=[];
             foreach($keys as $key)
             {
                 if($this->isValidKey($key))
@@ -84,20 +83,19 @@ class CacheItemPool implements CacheItemPoolInterface
                     if( static::$adapter->has($key) )
                     {
                         $value=static::$adapter->get($key);
-                        $items[$key]=new CacheItem(true, $key, $value);
+                        $item=new CacheItem($key, $value, true);
                     }
                     else
                     {
-                        $items[$key]=new CacheItem(false, $key, null);
+                        $item=new CacheItem( $key, null, false);
                     }
+                    yield $key=>$item;
                 }
                 else
                 {
                     throw new InvalidArgumentException("$key is not a legal value.");
                 }
             }
-
-            return $items;
         }
     }
 
@@ -155,14 +153,16 @@ class CacheItemPool implements CacheItemPoolInterface
         return static::$adapter->delete($keys);
     }
 
+
     /**
-     * @inheritDoc
+     * @param CacheItem $item
+     * @return bool
      */
     public function save(CacheItemInterface $item)
     {
         $key=$item->getKey();
-        $value=$item->get();
-        return static::$adapter->set($key, $value); //todo
+        $value=$item->getValue();
+        return static::$adapter->set($key, $value);
     }
 
     /**
@@ -180,7 +180,7 @@ class CacheItemPool implements CacheItemPoolInterface
     {
         foreach($this->deferItems as $item)
         {
-            if( static::$adapter->set($item->getKey(), $item->get()) )
+            if( static::$adapter->set($item->getKey(), $item->getValue()) )
             {
                 return false;
             }
@@ -196,7 +196,7 @@ class CacheItemPool implements CacheItemPoolInterface
      */
     protected function isValidKey($key)
     {
-        if( is_string($key) && preg_match('[a-zA-Z0-9_\.]+', $key) )
+        if( is_string($key) && preg_match("#[a-zA-Z0-9_\\.]+#", $key) )
             return true;
         else
             return false;

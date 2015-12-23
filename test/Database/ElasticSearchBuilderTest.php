@@ -14,7 +14,7 @@ require_once '../../scaffold/Database/Query/ElasticSearchBuilder.php';
 
 
 
-class ElasticSearchBuilderTest extends PHPUnit_Framework_TestCase
+class ElasticSearchBuilderTest extends \Test\TestCase
 {
     protected $builder;
     protected function setUp()

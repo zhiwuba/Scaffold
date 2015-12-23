@@ -8,9 +8,11 @@
  * file that was distributed with this source code.
  */
 
-require  '../vendor/autoload.php';
+namespace Test;
 
-class TestCase extends PHPUnit_Framework_TestCase
+use Scaffold\Cache\Adapter\RedisAdapter;
+
+class TestCase extends \PHPUnit_Framework_TestCase
 {
 
     /**
@@ -18,11 +20,13 @@ class TestCase extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        //TODO
-        $connector=new Connector();
-        \Scaffold\Database\Query\MysqlBuilder::setConnector($connector);
-        \Scaffold\Database\Query\CassandraBuilder::setConnection($connector);
-        \Scaffold\Database\Query\ElasticSearchBuilder::setConnection($connector);
+        //$connector=new Connector();
+        //\Scaffold\Database\Query\MysqlBuilder::setConnector($connector);
+        //\Scaffold\Database\Query\CassandraBuilder::setConnection($connector);
+        //\Scaffold\Database\Query\ElasticSearchBuilder::setConnection($connector);
+
+        $redis=new \Predis\Client();
+        \Scaffold\Cache\CacheItemPool::setAdapter(new RedisAdapter($redis));
         parent::setUp();
     }
 
