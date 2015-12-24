@@ -8,6 +8,7 @@
 
 namespace Scaffold\Application;
 
+use Scaffold\Cache\CacheItemPool;
 use Scaffold\Database\Connector\CassandraConnector;
 use Scaffold\Database\Connector\ElasticSearchConnector;
 use Scaffold\Database\Model\ModelException;
@@ -36,42 +37,62 @@ class Application
     /**
     *  @var Container
     */
-    protected $container;
+    protected static $container;
+
+    /**
+     * @var Application
+     */
+    protected static $instance;
 
     protected $rootPath;
 
+    public static function getInstance($name='')
+    {
+        if( empty($name) )
+            return static::$instance;
+        else
+            return static::$container->get($name);
+    }
 
     public function __construct($rootPath)
     {
+        static::$instance=$this;
+
+        static::$container=new Container();
+
         $this->rootPath=$rootPath;
 
-        $this->container=new Container();
-
-        $this->container->singleton('request', function(){
+        $this->container->singleton('Request', function(){
             return new ServerRequest();
         });
 
-        $this->container->singleton('response', function(){
+        $this->container->singleton('Response', function(){
            return new Response();
         });
 
-        $this->container->singleton('logger', function(){
+        $this->container->singleton('Logger', function(){
             $logFile=ROOT_PATH . '/log/default.log';
             $logger=Logger::createFileLogger($logFile);
             return $logger;
         });
 
-        $this->container->singleton('router', function(){
+        $this->container->singleton('Router', function(){
             return new Router($this);
         });
 
-        $this->container->singleton('session', function(){
+        $this->container->singleton('Session', function(){
             return new Session();
         });
 
-        $this->container->singleton('view', function(){
+        $this->container->singleton('View', function(){
             return new View();
         });
+
+        $this->container->singleton('Cache', function(){
+            return new CacheItemPool();
+        });
+
+        static::$instance=$this;
     }
 
     public function __get($name)

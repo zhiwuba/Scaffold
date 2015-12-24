@@ -13,7 +13,8 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
     protected $data=[];
 
     /**
-    *  set instance.
+    *  set instance, delay load instance.
+     *
      * @param string $key
      * @param \Closure $closure
     */
