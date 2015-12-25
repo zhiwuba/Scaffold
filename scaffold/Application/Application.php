@@ -46,6 +46,10 @@ class Application
 
     protected $rootPath;
 
+    protected $configPath;
+
+    protected $logPath;
+
     public static function getInstance($name='')
     {
         if( empty($name) )
@@ -175,15 +179,17 @@ class Application
     }
 
     /**
-    *  send header
+    *  send http header
     */
     public function sendHeader()
     {
         if( headers_sent() === false ){
+            $statusLine=$this->response->getStatusLine();
+            header($statusLine, false);
             $headers=$this->response->getHeaders();
             foreach($headers as $name=>$values){
                 foreach($values as $value){
-                    header("$name: $value", false);
+                    header("$name: $value", false);  //todo
                 }
             }
         }
@@ -225,7 +231,7 @@ class Application
         }
 		catch(ModelException $e)
 		{
-
+            echo "";
 		}
         catch(\Exception $e)
         {

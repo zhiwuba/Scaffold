@@ -90,12 +90,12 @@ class Response extends Message implements ResponseInterface
     /**
     *  @var int
     */
-    protected $statusCode;
+    protected $statusCode=200;
 
     /**
     *  @var string
     */
-    protected $reasonPhrase = '';
+    protected $reasonPhrase = 'OK';
 
     /**
      * Gets the response status code.
@@ -163,19 +163,20 @@ class Response extends Message implements ResponseInterface
         return $this->reasonPhrase;
     }
 
-    public function getHeaders()
-    {
-        $headers=parent::getHeaders();
-        if( !empty($this->statusCode) )
-        {
-            $headline=sprintf("HTTP/%s %d %s",
-                $this->getProtocolVersion(),
-                $this->statusCode,
-                $this->reasonPhrase
-            );
-            array_unshift($headers, $headline);
-        }
-        return $headers;
-    }
 
+    /**
+     * get status line
+     * eg: HTTP/1.1 404 Not Found
+     *
+     * @return string
+     */
+    public function getStatusLine()
+    {
+        $statusLine=sprintf("HTTP/%s %d %s",
+            $this->getProtocolVersion(),
+            $this->statusCode,
+            $this->reasonPhrase
+        );
+        return $statusLine;
+    }
 }

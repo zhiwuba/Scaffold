@@ -30,9 +30,9 @@ class Cookie
         }
     }
 
-    public function set($name, $value, $expire, $path,$domain, $secure, $httponly )
+    public function set($name, $value, $expire, $path,$domain, $secure, $httpOnly )
     {
-        setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+        setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
     }
 
     public function delete($name)

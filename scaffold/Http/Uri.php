@@ -388,7 +388,7 @@ class Uri implements UriInterface
      */
     public function withHost($host)
     {
-        if( true )
+        if( true )  //todo
         {
             $instance=clone $this;
             $instance->host=$host;
@@ -490,7 +490,7 @@ class Uri implements UriInterface
      */
     public function withQuery($query)
     {
-        if ( true )
+        if ( true )  //todo
         {
             $query=urldecode($query);
             $instance=clone $this;

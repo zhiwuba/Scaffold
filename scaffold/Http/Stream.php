@@ -55,6 +55,8 @@ class Stream implements StreamInterface
 
     /**
     *  create from memory
+     *
+     *  read write
      * @return Stream
     */
     public static function createFromMemory()
@@ -93,9 +95,16 @@ class Stream implements StreamInterface
      */
     public function __toString()
     {
-        fseek($this->resource, 0, SEEK_SET);
-        $string=fread($this->resource, filesize($this->filename));
-        return $string;
+        if( is_resource($this->resource) )
+        {
+            fseek($this->resource, 0, SEEK_SET);
+            $string=fread($this->resource, $this->getSize());
+            return $string;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**

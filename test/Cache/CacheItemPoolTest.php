@@ -60,10 +60,7 @@ class CacheItemPoolTest extends \Test\TestCase
 
         $items=$pool->getItems(['aa_7', 'aa_0', 'aa_3']);
 
-        foreach($items as $key=>$value)
-        {
-            echo $key, '===' ,$value->getValue(), PHP_EOL;
-        }
+
     }
 
 }

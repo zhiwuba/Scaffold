@@ -1,12 +1,11 @@
 <?php
 
-require_once '../app/Configs/app.php';
-
 require_once '../vendor/autoload.php';
 
 //$redisConnection=new \Predis\Client();
 
 //\Scaffold\Cache\CacheItemPool::setAdapter(new \Scaffold\Cache\Adapter\RedisAdapter($redisConnection));
+
 
 $app=new \Scaffold\Application\Application('');
 

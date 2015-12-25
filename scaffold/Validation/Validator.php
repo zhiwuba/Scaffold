@@ -15,6 +15,8 @@
 
 namespace Scaffold\Validation;
 
+use Scaffold\Http\Uri;
+
 class Validator
 {
     protected static $supportRules=[
@@ -50,8 +52,14 @@ class Validator
         return new Validator($input, $rules);
     }
 
+    /**
+     *  trigger function
+     *
+     * @return mixed
+     */
     public function fails()
     {
+        //
         return $this->result;
     }
 
@@ -60,32 +68,51 @@ class Validator
         return $this->message;
     }
 
-    protected function isNumber()
+    private function isNumber()
     {
 
     }
 
-    public function isString()
+    private function isString()
     {
 
     }
 
-    public function isEmail()
+    private function isEmail()
     {
 
     }
 
-    public function isPassword()
+    private function isPassword()
     {
 
     }
 
-    public function isRequire()
+    private function isRequire($array, $key)
     {
-        $args=func_get_args();
+
     }
 
-    protected function filter(array $input,  array $rules)
+    private function isBetween($value, $min, $max)
+    {
+        return $value>=$min && $value<=$max;
+    }
+
+    private function isActiveUrl($url)
+    {
+        $components=parse_url($url);
+        if( $components!==false )
+            return checkdnsrr($components['host']);
+        else
+            return false;
+    }
+
+    private function isArray($args)
+    {
+        return is_array($args);
+    }
+
+    private function filter(array $input,  array $rules)
     {
         foreach($rules as $key=>$rule )
         {
@@ -94,7 +121,7 @@ class Validator
         }
     }
 
-    protected function match($input, $key, $rule)
+    private function match($input, $key, $rule)
     {
         switch($rule)
         {

@@ -22,7 +22,7 @@ use Psr\Http\Message\StreamInterface;
  * @link http://www.ietf.org/rfc/rfc7230.txt
  * @link http://www.ietf.org/rfc/rfc7231.txt
  */
-abstract class Message implements MessageInterface
+class Message implements MessageInterface
 {
     /**
     *  @var array
@@ -233,7 +233,7 @@ abstract class Message implements MessageInterface
             array_push($this->headers[$name], $value);
             return $this;
         }else{
-            throw new \InvalidArgumentException(__FUNCTION__ );
+            throw new \InvalidArgumentException("invalid header names or values in withAddedHeader");
         }
     }
 
