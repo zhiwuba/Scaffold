@@ -6,7 +6,8 @@
     "psr/http-message": "^1.0",
     "psr/cache": "^1.0",
     "psr/log": "^1.0",
-    "predis/predis": "^1.0"
+    "predis/predis": "^1.0",
+    "datastax/php-driver": "^1.0"
   },
   "autoload":{
     "psr-4":{

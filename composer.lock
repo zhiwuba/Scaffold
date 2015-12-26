@@ -4,8 +4,54 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9266d29fe204507885af8f13a8ec9696",
+    "hash": "18b60b5700dc98e1c86920b031d5215f",
     "packages": [
+        {
+            "name": "datastax/php-driver",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/datastax/php-driver.git",
+                "reference": "1083e9c5de91c28f6d46959f127d145e4f65e292"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "http://packagist.phpcomposer.com/files/datastax/php-driver/1083e9c5de91c28f6d46959f127d145e4f65e292.zip",
+                "reference": "1083e9c5de91c28f6d46959f127d145e4f65e292",
+                "shasum": ""
+            },
+            "require-dev": {
+                "behat/behat": "~3.0.6",
+                "ext-cassandra": "*",
+                "php": ">=5.3.4",
+                "phpunit/php-code-coverage": "~2.0",
+                "phpunit/php-token-stream": "~1.3",
+                "phpunit/phpunit": "4.5.*",
+                "symfony/process": "~2.1"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Bulat Shakirzyanov",
+                    "email": "bulat.shakirzyanov@datastax.com",
+                    "homepage": "http://avalanche123.com"
+                }
+            ],
+            "description": "DataStax PHP Driver for Apache Cassandra",
+            "homepage": "http://datastax.github.io/php-driver/",
+            "keywords": [
+                "cassandra",
+                "database",
+                "datastax",
+                "driver",
+                "nosql"
+            ],
+            "time": "2015-11-20 19:40:17"
+        },
         {
             "name": "doctrine/instantiator",
             "version": "1.0.5",

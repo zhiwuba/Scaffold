@@ -6,9 +6,9 @@
  * Time: 0:46
  */
 
+namespace Scaffold\Exception;
 
-class ExceptionBase extends Exception
+class Exception extends \Exception
 {
 
 }
-

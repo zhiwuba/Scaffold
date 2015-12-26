@@ -15,26 +15,28 @@
 
 namespace Scaffold\Validation;
 
+use Scaffold\Exception\Exception;
+use Scaffold\Helper\Utility;
 use Scaffold\Http\Uri;
 
 class Validator
 {
     protected static $supportRules=[
-        'active_url'  =>['one',  ],
-        'array'         =>['one',   ],
-        'between'   =>['some', ],
-        'date'          =>['none', ],
-        'email'        =>['none', ],
-        'image'       =>['none', ],
-        'in'              =>['some', ],
-        'integer'     =>['none', ],
-        'ip'              =>['none', ],
-        'max'          =>['one',   ],
-        'min'           =>['one',   ],
-        'not_in'       =>['some', ],
-        'regex'        =>['one',   ],
-        'required'  =>['none', ],
-        'url'            =>['one',   ]
+        'active_url',
+        'array',
+        'between',
+        'date',
+        'email' ,
+        'image',
+        'in' ,
+        'integer',
+        'ip',
+        'max',
+        'min',
+        'not_in' ,
+        'regex',
+        'required',
+        'url'
     ];
     protected $rules;
     protected $input;
@@ -55,12 +57,43 @@ class Validator
     /**
      *  trigger function
      *
-     * @return mixed
+     * @return bool
+     * @throws Exception
      */
     public function fails()
     {
-        //
-        return $this->result;
+        foreach($this->rules as $key=>$ruleString)
+        {
+            $rules=explode('|', $ruleString);
+            foreach($rules as $rule)
+            {
+                $parts=explode(':', $rule);
+                if( count($parts)==1 ) {
+                    $function=Utility::camelCase('is_' . $parts[0]);
+                    $params=[isset($this->input[$key])? $this->input[$key] : ''];
+                }
+                else if( count($parts)==2 ) {
+                    $function=Utility::camelCase('is_' . $parts[0]);
+                    $params=[isset($this->input[$key])? $this->input[$key] : ''];
+                    array_merge($params, explode(',', $parts[1]));
+                }
+                else {
+                    throw new Exception("wrong rule  $rule");
+                }
+
+                if( is_callable([$this, $function]) ) {
+                    $ret=call_user_func_array([$this,$function], $params);
+                } else {
+                    throw new Exception("unsupported rule {$parts[0]}");
+                }
+
+                if( $ret===false ) {
+                    $this->message="$key isn't match $rule";
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public function messages()
@@ -68,29 +101,18 @@ class Validator
         return $this->message;
     }
 
-    private function isNumber()
+    private function isActiveUrl($value)
     {
-
+        $components=parse_url($value);
+        if( $components!==false )
+            return checkdnsrr($components['host']);
+        else
+            return false;
     }
 
-    private function isString()
+    private function isArray($value)
     {
-
-    }
-
-    private function isEmail()
-    {
-
-    }
-
-    private function isPassword()
-    {
-
-    }
-
-    private function isRequire($array, $key)
-    {
-
+        return is_array($value);
     }
 
     private function isBetween($value, $min, $max)
@@ -98,49 +120,40 @@ class Validator
         return $value>=$min && $value<=$max;
     }
 
-    private function isActiveUrl($url)
+    private function isEmail($value)
     {
-        $components=parse_url($url);
-        if( $components!==false )
-            return checkdnsrr($components['host']);
-        else
-            return false;
+        return preg_match('#\w+@\w+\.\w+#', $value);
     }
 
-    private function isArray($args)
+    private function isImage()
     {
-        return is_array($args);
+        return preg_match();
     }
 
-    private function filter(array $input,  array $rules)
+    private function isIn()
     {
-        foreach($rules as $key=>$rule )
-        {
-            $ruleItems=explode('|', $rule);
-
-        }
+        $args=func_get_args();
+        $value=array_shift($args);
+        return in_array($value, $args);
     }
 
-    private function match($input, $key, $rule)
+    private function isInteger($value)
     {
-        switch($rule)
-        {
-            case 'required':
-                return isset($input[$key]);
-            case 'number':
-                break;
-            case 'string':
-                break;
-            case 'array':
-                break;
-            case 'email':
-                break;
-            case 'password':
-                break;
-            case 'ip':
-                break;
-            case 'image':
-                break;
-        }
+        return is_integer($value);
+    }
+
+    private function isPassword()
+    {
+        return true;
+    }
+
+    private function isRequire($value)
+    {
+        return !empty($value);
+    }
+
+    private function isString($value)
+    {
+        return is_string($value);
     }
 }

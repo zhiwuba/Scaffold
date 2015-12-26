@@ -26,11 +26,15 @@ use Scaffold\View\View;
 
 
 /**
- *  Application
- * @property \Scaffold\Routing\Router $router
+ *   Application core
+ *
+ * @property  \Scaffold\Routing\Router $router
 *  @property  \Scaffold\Http\ServerRequest $request
  * @property  \Scaffold\Http\Response $response
  * @property  \Scaffold\Log\Logger    $logger
+ * @property  \Scaffold\Cache\CacheItemPool $cache
+ * @property  \Scaffold\View\View   $view
+ * @property   \Scaffold\Session\Session $session
  */
 class Application
 {
@@ -44,12 +48,19 @@ class Application
      */
     protected static $instance;
 
+    /**
+     * @var string
+     */
     protected $rootPath;
 
     protected $configPath;
 
     protected $logPath;
 
+    /**
+     * @param string $name
+     * @return null|Application
+     */
     public static function getInstance($name='')
     {
         if( empty($name) )
@@ -58,6 +69,10 @@ class Application
             return static::$container->get($name);
     }
 
+    /**
+     * Application constructor.
+     * @param $rootPath
+     */
     public function __construct($rootPath)
     {
         static::$instance=$this;
@@ -66,33 +81,33 @@ class Application
 
         $this->rootPath=$rootPath;
 
-        $this->container->singleton('Request', function(){
+        static::$container->singleton('Request', function(){
             return new ServerRequest();
         });
 
-        $this->container->singleton('Response', function(){
+        static::$container->singleton('Response', function(){
            return new Response();
         });
 
-        $this->container->singleton('Logger', function(){
-            $logFile=ROOT_PATH . '/log/default.log';
+        static::$container->singleton('Logger', function(){
+            $logFile=$this->rootPath . '/log/default.log';
             $logger=Logger::createFileLogger($logFile);
             return $logger;
         });
 
-        $this->container->singleton('Router', function(){
+        static::$container->singleton('Router', function(){
             return new Router($this);
         });
 
-        $this->container->singleton('Session', function(){
+        static::$container->singleton('Session', function(){
             return new Session();
         });
 
-        $this->container->singleton('View', function(){
+        static::$container->singleton('View', function(){
             return new View();
         });
 
-        $this->container->singleton('Cache', function(){
+        static::$container->singleton('Cache', function(){
             return new CacheItemPool();
         });
 
@@ -101,22 +116,22 @@ class Application
 
     public function __get($name)
     {
-        return $this->container->get($name);
+        return static::$container->get($name);
     }
 
     public function __set($name, $value)
     {
-        $this->container->set($name, $value);
+        static::$container->set($name, $value);
     }
 
     public function __isset($name)
     {
-        return $this->container->has($name);
+        return static::$container->has($name);
     }
 
     public function __unset($name)
     {
-        $this->container->remove($name);
+        static::$container->remove($name);
     }
 
     /**
@@ -231,8 +246,12 @@ class Application
         }
 		catch(ModelException $e)
 		{
-            echo "";
+
 		}
+        catch(\Scaffold\Exception\Exception $e)
+        {
+
+        }
         catch(\Exception $e)
         {
 			$this->logger->error($e->getMessage());
