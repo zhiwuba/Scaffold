@@ -10,6 +10,9 @@
 
 namespace Scaffold\Routing;
 
+use Scaffold\Application\Application;
+use Scaffold\Controller\Controller;
+
 class Route
 {
     protected $pattern;
@@ -134,13 +137,15 @@ class Route
             $parts=explode('@' , $this->callback);
             if( count($parts)==2 )
             {
-                list($controllerName, $function)=$parts;
-                $controller=new $controllerName;
+                list($controllerClass, $function)=$parts;
+                /**@var $controller Controller */
+                $controller=new $controllerClass;
+                $controller->setApplication(Application::getInstance());
                 call_user_func_array([$controller, $function], $this->params);
             }
             else
             {
-                throw new \Exception(__CLASS__ . __FUNCTION__ . "");
+                throw new \Exception("wrong route.");
             }
         }
         else if(is_array($this->callback))
@@ -153,7 +158,7 @@ class Route
         }
         else
         {
-            throw new \Exception(__CLASS__ . __FUNCTION__ . "route can't dispatch.");
+            throw new \Exception("route can't dispatch.");
         }
     }
 }

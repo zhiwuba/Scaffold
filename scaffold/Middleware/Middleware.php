@@ -8,17 +8,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Scaffold\Database\Connector;
+namespace Scaffold\Middleware;
 
-class MongoConnector extends  Connector
+abstract class Middleware
 {
-    public function __construct()
+    protected $name;
+
+    protected $middleware;
+
+    /**
+     * perform action
+     *
+     */
+    abstract public function call();
+
+    public function getMiddleware()
     {
 
     }
 
-    public function getConnection($name = '')
-    {
-        // TODO: Implement getConnection() method.
-    }
 }

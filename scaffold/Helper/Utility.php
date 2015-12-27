@@ -168,6 +168,17 @@ class Utility
         return $interval->days*86400+$interval->h*3600 +$interval->m*60+$interval->s;
     }
 
+    /**
+     *  generate global id
+     *
+     * @return integer (64)
+     */
+    public static function generateId()
+    {
+        $id=microtime(true); //todo
+        return $id;
+    }
+
 }
 
 

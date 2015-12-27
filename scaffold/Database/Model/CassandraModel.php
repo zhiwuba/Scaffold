@@ -10,9 +10,11 @@
 
 namespace Scaffold\Database\Model;
 
+use Scaffold\Database\Query\CassandraBuilder;
+
 class CassandraModel extends Model
 {
-    protected static $builderClass='CassandraBuilder';
+    protected static $builderClass=CassandraBuilder::class;
 
 }
 

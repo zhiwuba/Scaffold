@@ -28,13 +28,13 @@ use Scaffold\View\View;
 /**
  *   Application core
  *
- * @property  \Scaffold\Routing\Router $router
-*  @property  \Scaffold\Http\ServerRequest $request
- * @property  \Scaffold\Http\Response $response
- * @property  \Scaffold\Log\Logger    $logger
+ * @property  \Scaffold\Routing\Router          $router
+*  @property  \Scaffold\Http\ServerRequest    $request
+ * @property  \Scaffold\Http\Response           $response
+ * @property  \Scaffold\Log\Logger                 $logger
  * @property  \Scaffold\Cache\CacheItemPool $cache
- * @property  \Scaffold\View\View   $view
- * @property   \Scaffold\Session\Session $session
+ * @property  \Scaffold\View\View                   $view
+ * @property  \Scaffold\Session\Session            $session
  */
 class Application
 {
@@ -81,57 +81,42 @@ class Application
 
         $this->rootPath=$rootPath;
 
-        static::$container->singleton('Request', function(){
+        static::$container->singleton('request', function(){
             return new ServerRequest();
         });
 
-        static::$container->singleton('Response', function(){
+        static::$container->singleton('response', function(){
            return new Response();
         });
 
-        static::$container->singleton('Logger', function(){
+        static::$container->singleton('logger', function(){
             $logFile=$this->rootPath . '/log/default.log';
             $logger=Logger::createFileLogger($logFile);
             return $logger;
         });
 
-        static::$container->singleton('Router', function(){
+        static::$container->singleton('router', function(){
             return new Router($this);
         });
 
-        static::$container->singleton('Session', function(){
+        static::$container->singleton('session', function(){
             return new Session();
         });
 
-        static::$container->singleton('View', function(){
-            return new View();
+        static::$container->singleton('view', function(){
+            return new View($this);
         });
 
-        static::$container->singleton('Cache', function(){
+        static::$container->singleton('cache', function(){
             return new CacheItemPool();
         });
 
         static::$instance=$this;
     }
 
-    public function __get($name)
+    public function getViewPath()
     {
-        return static::$container->get($name);
-    }
-
-    public function __set($name, $value)
-    {
-        static::$container->set($name, $value);
-    }
-
-    public function __isset($name)
-    {
-        return static::$container->has($name);
-    }
-
-    public function __unset($name)
-    {
-        static::$container->remove($name);
+        return $this->rootPath . '/app/Views/';
     }
 
     /**
@@ -258,5 +243,18 @@ class Application
 			$this->renderException($e);
             exit;
         }
+    }
+
+    public function __get($name){
+        return static::$container->get($name);
+    }
+    public function __set($name, $value){
+        static::$container->set($name, $value);
+    }
+    public function __isset($name){
+        return static::$container->has($name);
+    }
+    public function __unset($name){
+        static::$container->remove($name);
     }
 }

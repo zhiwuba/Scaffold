@@ -9,32 +9,28 @@
 namespace Scaffold\View;
 
 use Scaffold\Application\Application;
+use Scaffold\Application\AppTrait;
 use Scaffold\Http\Stream;
 
 
 class View
 {
-    /**
-    *  @var \Scaffold\Application\Application $app
-    */
-    protected $app;
+    use AppTrait;
 
     /**
-    *  @var  Array
+    *  @var  array
     */
     protected $data=[];
 
-
-    public function getApplication()
+    /**
+     * View constructor.
+     * @param $app
+     */
+    public function __construct($app)
     {
-        return $this->app;
+        var_dump($app);
+        $this->setApplication($app);
     }
-
-    public function setApplication(Application $app)
-    {
-        $this->app=$app;
-    }
-
 
     /**
     *  append data
@@ -47,7 +43,7 @@ class View
     /**
     *   render template.
      * @param string $template
-     * @param Array  $data
+     * @param array  $data
     */
     public function render($template, array $data)
     {
@@ -55,7 +51,7 @@ class View
 
         ob_start();
         extract($this->data);
-        require $template;
+        require $this->app->getViewPath() . $template . 'php';
         $content=ob_get_clean();
 
         $stream= Stream::createFromMemory();
@@ -63,4 +59,18 @@ class View
 
         $this->app->response->withBody($stream);
     }
+
+    public function getTemplatePath($name)
+    {
+        if( strrpos('', $name) )  //todo
+        {
+
+        }
+        else
+        {
+
+        }
+        return $this->app->getViewPath() . $name . '.view.php';
+    }
+
 }

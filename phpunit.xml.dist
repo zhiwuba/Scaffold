@@ -18,6 +18,9 @@
         <testsuite name="http">
             <directory>test/Http</directory>
         </testsuite>
+        <testsuite name="container">
+            <directory>test/Container</directory>
+        </testsuite>
     </testsuites>
 
 </phpunit>

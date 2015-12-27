@@ -13,7 +13,7 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
     protected $data=[];
 
     /**
-    *  set instance, delay load instance.
+    *  set instance, defer-loading.
      *
      * @param string $key
      * @param \Closure $closure
@@ -22,7 +22,7 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
     {
         if( !$this->has($key) )
         {
-            $this->set($key,  $closure());
+            $this->set($key,  $closure);
         }
     }
 
@@ -65,6 +65,10 @@ class Container implements \ArrayAccess, \Countable, \IteratorAggregate
     public function get( $key, $default=null )
     {
         if( $this->has($key) ) {
+            $object=$this->data[$key];
+            if($object instanceof \Closure){
+                $this->data[$key]=$object();
+            }
             return $this->data[$key];
         }
         return $default;

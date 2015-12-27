@@ -17,17 +17,17 @@ use Scaffold\Helper\Utility;
 abstract class Model extends \ArrayObject implements \JsonSerializable
 {
     /**
-    *  @var string
+    *  @var string todo
     */
     protected static $tableName;
 
     /**
-    *  @var array
+    *  @var array todo
     */
     protected static $primaryKey=[];
 
     /**
-    *  @var string
+    *  @var string todo
     */
     protected static $builderClass;
 
@@ -36,6 +36,10 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      */
     protected $data;
 
+    /**
+     * @var bool todo
+     */
+    protected $cache=false;
 
     public function __construct($attribute=[])
     {

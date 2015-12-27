@@ -6,23 +6,43 @@
  * Time: 下午9:08
  */
 
-class ContainerTest extends PHPUnit_Framework_TestCase
+namespace Test\Container;
+
+use Scaffold\Helper\Container;
+use Test\TestCase;
+
+class Object
 {
-    protected function setUp()
+    /**
+     * Object constructor.
+     */
+    public function __construct()
     {
-        echo "EnterInto setUp\n";
-        parent::setUp();
+        echo "construct";
     }
 
-    public function testContainer()
-    {
-        $this->assertEquals([1,2,3], [1,2,3]);
-    }
+    public $name='object';
+}
 
-    protected function tearDown()
+
+
+class ContainerTest extends TestCase
+{
+    public function testSingleton()
     {
-        echo "EnterInto tearDown\n";
-        parent::tearDown();
+        $container=new Container();
+
+        $container->singleton('object', function(){
+            return new Object();
+        });
+
+        $object=$container->get('object');
+        $this->assertEquals('object', $object->name);
+
+        $object->name='new-object';
+
+        $object2=$container->get('object');
+        $this->assertEquals('new-object', $object2->name);
     }
 
 }

@@ -10,8 +10,10 @@
 
 namespace Scaffold\Database\Model;
 
+use Scaffold\Database\Query\ElasticSearchBuilder;
+
 class ElasticSearchModel extends Model
 {
-    protected static $builderClass='ElasticSearchBuilder';
+    protected static $builderClass=ElasticSearchBuilder::class;
 
 }

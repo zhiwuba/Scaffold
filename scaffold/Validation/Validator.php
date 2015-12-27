@@ -8,19 +8,16 @@
  * file that was distributed with this source code.
  */
 
-/**
- *  1. easy extension.
- *  todo
- */
-
 namespace Scaffold\Validation;
 
 use Scaffold\Exception\Exception;
 use Scaffold\Helper\Utility;
-use Scaffold\Http\Uri;
 
 class Validator
 {
+    /**
+     * @var array
+     */
     protected static $supportRules=[
         'active_url',
         'array',
@@ -38,17 +35,41 @@ class Validator
         'required',
         'url'
     ];
+
+    /**
+     * @var array
+     */
     protected $rules;
+
+    /**
+     * @var array
+     */
     protected $input;
-    protected $result;
+
+    /**
+     * @var string
+     */
     protected $message;
 
+    /**
+     * Validator constructor.
+     * @param $input
+     * @param $rules
+     */
     public function __construct($input, $rules)
     {
         $this->input=$input;
         $this->rules=$rules;
     }
 
+    /**
+     * create validator
+     * eg: make($_GET, ['name'=>'required', 'age'=>'required|between:18,45'])
+     *
+     * @param array $input
+     * @param array $rules
+     * @return Validator
+     */
     public static function make(array $input ,array $rules)
     {
         return new Validator($input, $rules);
@@ -96,12 +117,15 @@ class Validator
         return false;
     }
 
+    /**
+     * @return string
+     */
     public function messages()
     {
         return $this->message;
     }
 
-    private function isActiveUrl($value)
+    protected function isActiveUrl($value)
     {
         $components=parse_url($value);
         if( $components!==false )
@@ -110,50 +134,77 @@ class Validator
             return false;
     }
 
-    private function isArray($value)
+    protected function isArray($value)
     {
         return is_array($value);
     }
 
-    private function isBetween($value, $min, $max)
+    protected function isBetween($value, $min, $max)
     {
         return $value>=$min && $value<=$max;
     }
 
-    private function isEmail($value)
+    protected function isDate($value)
     {
-        return preg_match('#\w+@\w+\.\w+#', $value);
+        return preg_match('#^\d{4}-\d{1,2}-\d{1,2}$#', $value);
     }
 
-    private function isImage()
+    protected function isEmail($value)
     {
-        return preg_match();
+        return preg_match('#^\w+@\w+\.\w+$#', $value);
     }
 
-    private function isIn()
+    protected function isImage($value)
+    {
+        return preg_match('#^\w+\.(jpg|png|bmp|gif)$#', $value );
+    }
+
+    protected function isIn()
     {
         $args=func_get_args();
         $value=array_shift($args);
         return in_array($value, $args);
     }
 
-    private function isInteger($value)
+    protected function isInteger($value)
     {
         return is_integer($value);
     }
 
-    private function isPassword()
+    protected function isIp($value)
     {
-        return true;
+        return preg_match('#^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$#', $value);
     }
 
-    private function isRequire($value)
+    protected function isMax($value, $len)
+    {
+        return strlen($value)<=$len;
+    }
+
+    protected function isMin($value, $len)
+    {
+        return strlen($value)>=$len;
+    }
+
+    protected function isNotIn()
+    {
+        $args=func_get_args();
+        $value=array_shift($args);
+        return !in_array($value, $args);
+    }
+
+    protected function isPassword($value)
+    {
+        return preg_match('#^\w+[6,10]$',$value);
+    }
+
+    protected function isRequire($value)
     {
         return !empty($value);
     }
 
-    private function isString($value)
+    protected function isRegex($value,$regex)
     {
-        return is_string($value);
+        return preg_match($regex, $value);
     }
 }

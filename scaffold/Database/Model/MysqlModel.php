@@ -10,9 +10,11 @@
 
 namespace Scaffold\Database\Model;
 
+use Scaffold\Database\Query\MysqlBuilder;
+
 abstract class MysqlModel extends Model
 {
-    protected static $builderClass='Scaffold\Database\Query\MysqlBuilder';
+    protected static $builderClass=MysqlBuilder::class;
 
 
 }
