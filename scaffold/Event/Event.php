@@ -8,18 +8,26 @@
  * file that was distributed with this source code.
  */
 
-namespace Scaffold\Push;
+namespace Scaffold\Event;
 
 /**
- * WebSocket
- * @class Push
+ * Class Event
+ * @package Scaffold\Event
  */
-class Push
+class Event
 {
-    public function push()
+    public function registerEvent()
     {
 
     }
 
+    public function registerListen()
+    {
 
+    }
+
+    public function dispatch()
+    {
+
+    }
 }
