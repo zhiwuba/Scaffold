@@ -28,16 +28,16 @@ class View
      */
     public function __construct($app)
     {
-        var_dump($app);
         $this->setApplication($app);
     }
 
     /**
     *  append data
+     * @param $data array
     */
     public function appendData($data)
     {
-        array_merge($this->data, $data);
+        $this->data=array_merge($this->data, $data);
     }
 
     /**
@@ -51,7 +51,8 @@ class View
 
         ob_start();
         extract($this->data);
-        require $this->app->getViewPath() . $template . 'php';
+        $templatePath=$this->getTemplatePath($template);
+        require "$templatePath";
         $content=ob_get_clean();
 
         $stream= Stream::createFromMemory();
@@ -60,17 +61,18 @@ class View
         $this->app->response->withBody($stream);
     }
 
+    /**
+     * @param $name
+     * @return string
+     */
     public function getTemplatePath($name)
     {
-        if( strrpos('', $name) )  //todo
-        {
-
+        if( strpos('.view.php', $name) ) {
+            return $this->app->getViewPath() . $name;
         }
-        else
-        {
-
+        else {
+            return $this->app->getViewPath() . $name . '.view.php';
         }
-        return $this->app->getViewPath() . $name . '.view.php';
     }
 
 }

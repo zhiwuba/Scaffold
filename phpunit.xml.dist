@@ -21,6 +21,9 @@
         <testsuite name="container">
             <directory>test/Container</directory>
         </testsuite>
+        <testsuite name="view">
+            <directory>test/View</directory>
+        </testsuite>
     </testsuites>
 
 </phpunit>
