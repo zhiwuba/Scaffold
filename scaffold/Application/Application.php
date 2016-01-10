@@ -119,6 +119,11 @@ class Application
         return $this->rootPath . '/app/Views/';
     }
 
+    public function getViewCachePath()
+    {
+        return $this->rootPath . '/storage/views/';
+    }
+
     /**
     *  include route file.
      * @param  string $filePath

@@ -24,7 +24,7 @@ class MainController extends Controller
 
     public function getList($id)
     {
-        return $this->app->view->render('main', ['name'=>'liubingxia', 'email'=>'xiabingliu@163.com']);
+        $this->app->view->render('main', ['name'=>'liubingxia', 'email'=>'xiabingliu@163.com']);
     }
 
     public function validateData()

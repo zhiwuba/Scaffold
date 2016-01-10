@@ -11,6 +11,7 @@ namespace Scaffold\View;
 use Scaffold\Application\Application;
 use Scaffold\Application\AppTrait;
 use Scaffold\Http\Stream;
+use Scaffold\View\Engine\Compile;
 
 
 class View
@@ -49,11 +50,8 @@ class View
     {
         $this->appendData($data);
 
-        ob_start();
-        extract($this->data);
-        $templatePath=$this->getTemplatePath($template);
-        require "$templatePath";
-        $content=ob_get_clean();
+        $compile=new Compile($this->app->getViewCachePath());
+        $content=$compile->compile($this->getTemplatePath($template), $this->data);
 
         $stream= Stream::createFromMemory();
         $stream->write($content);
@@ -67,11 +65,11 @@ class View
      */
     public function getTemplatePath($name)
     {
-        if( strpos('.view.php', $name) ) {
+        if( strpos('.blade.php', $name) ) {
             return $this->app->getViewPath() . $name;
         }
         else {
-            return $this->app->getViewPath() . $name . '.view.php';
+            return $this->app->getViewPath() . $name . '.blade.php';
         }
     }
 
