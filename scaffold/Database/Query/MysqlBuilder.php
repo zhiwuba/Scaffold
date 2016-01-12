@@ -281,57 +281,6 @@ class MysqlBuilder extends Builder
         }
     }
 
-    /**
-     *  transaction.
-     * @param $callback \Closure
-     * @return mixed
-     */
-    public static function transaction(\Closure $callback)
-    {
-        try
-        {
-            static::setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            static::beginTransaction();
-            $callback();
-            static::commit();
-            return ['ret'=>1];
-        }
-        catch(\PDOException $e)
-        {
-            static::rollBack();
-            return ['ret'=>0, 'error'=>$e->getMessage()];
-        }
-    }
-
-    public static function setAttribute($key, $value)
-    {
-        return static::getConnection()->setAttribute($key, $value);
-    }
-
-    public static function beginTransaction()
-    {
-        if( !static::$transactionCounter++ )
-            return static::getConnection()->beginTransaction();
-        return static::$transactionCounter >= 0;
-    }
-
-    public static function commit()
-    {
-        if( !--static::$transactionCounter )
-            return static::getConnection()->commit();
-        return static::$transactionCounter>=0;
-    }
-
-    public static function rollBack()
-    {
-        if( static::$transactionCounter>=0 ) {
-            static::$transactionCounter=0;
-            return static::getConnection()->rollBack();
-        }
-        static::$transactionCounter=0;
-        return false;
-    }
-
     protected function assembleSelect()
     {
         $bindings=[];
@@ -479,4 +428,54 @@ class MysqlBuilder extends Builder
         return $expression;
     }
 
+    /**
+     *  transaction.
+     * @param $callback \Closure
+     * @return mixed
+     */
+    public static function transaction(\Closure $callback)
+    {
+        try
+        {
+            static::setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            static::beginTransaction();
+            $callback();
+            static::commit();
+            return ['ret'=>1];
+        }
+        catch(\PDOException $e)
+        {
+            static::rollBack();
+            return ['ret'=>0, 'error'=>$e->getMessage()];
+        }
+    }
+
+    public static function setAttribute($key, $value)
+    {
+        return static::getConnection()->setAttribute($key, $value);
+    }
+
+    public static function beginTransaction()
+    {
+        if( !static::$transactionCounter++ )
+            return static::getConnection()->beginTransaction();
+        return static::$transactionCounter >= 0;
+    }
+
+    public static function commit()
+    {
+        if( !--static::$transactionCounter )
+            return static::getConnection()->commit();
+        return static::$transactionCounter>=0;
+    }
+
+    public static function rollBack()
+    {
+        if( static::$transactionCounter>=0 ) {
+            static::$transactionCounter=0;
+            return static::getConnection()->rollBack();
+        }
+        static::$transactionCounter=0;
+        return false;
+    }
 }

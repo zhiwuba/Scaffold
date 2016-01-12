@@ -232,6 +232,15 @@ abstract class Builder
         return $this->model;
     }
 
+    public function restrictScenario($scenario)
+    {
+        if( (is_array($scenario)&&!in_array($this->scenario, $scenario)) ||
+            (is_string($scenario)&& $this->scenario!=$scenario))
+        {
+            throw new BuilderException("operate is forbidden in this scenario");
+        }
+    }
+
     /**
     *  assemble fluent query.
      */

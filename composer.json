@@ -2,12 +2,12 @@
   "require": {
     "phpunit/phpunit": "^4.8",
     "elasticsearch/elasticsearch": "^2.0",
-    "duoshuo/php-cassandra": "^0.5.2",
     "psr/http-message": "^1.0",
     "psr/cache": "^1.0",
     "psr/log": "^1.0",
     "predis/predis": "^1.0",
-    "datastax/php-driver": "^1.0"
+    "datastax/php-driver": "^1.0",
+    "symfony/event-dispatcher": "^3.0"
   },
   "autoload":{
     "psr-4":{

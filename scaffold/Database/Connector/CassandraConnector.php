@@ -9,21 +9,41 @@
  */
 
 namespace Scaffold\Database\Connector;
+use Cassandra;
+use Cassandra\Session;
 
 class CassandraConnector extends Connector
 {
-	/**
+    protected $configs;
+
+    protected $connection;
+
+    public function __construct($configs)
+    {
+        $this->configs=$configs;
+    }
+
+    /**
 	 * get default connection.
 	 * @param $name string
-	 * @return Object
+	 * @return Session
 	 */
 	public function getConnection($name = '')
 	{
-		return NULL;
+        if( !isset($this->connection) )
+        {
+            if( is_string($this->configs) )
+                $points=$this->configs;
+            else
+                $points=implode(',', $this->configs);
+
+            $this->connection=Cassandra::cluster()->withContactPoints($points)->build()->connect();
+        }
+		return $this->connection;
 	}
 
-	public static function loadConfig($config)
+	public static function loadConfig($configs)
 	{
-		return new static();
+		return new static($configs);
 	}
 }

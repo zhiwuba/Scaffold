@@ -16,5 +16,11 @@ class CassandraModel extends Model
 {
     protected static $builderClass=CassandraBuilder::class;
 
+    protected static $columns;
+
+    public static function getColumns()
+    {
+        return static::$columns;
+    }
 }
 

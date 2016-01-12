@@ -163,7 +163,7 @@ class Parse
      */
     protected function parseShow()
     {
-        $this->pregReplace( '#@show#', '<?php $__compile->showSection();?>');
+        $this->pregReplace( '#@show\b#', '<?php $__compile->showSection();?>');
     }
 
     /**
@@ -171,7 +171,7 @@ class Parse
      */
     protected function parseStop()
     {
-        $this->pregReplace('#@stop#', '<?php $__compile->stopSection();?>' );
+        $this->pregReplace('#@stop\b#', '<?php $__compile->stopSection();?>' );
     }
 
     /**
@@ -179,7 +179,7 @@ class Parse
      */
     protected function parseAppend()
     {
-        $this->pregReplace('#@append#', '<?php $__compile->appendSection(); ?>');
+        $this->pregReplace('#@append\b#', '<?php $__compile->appendSection(); ?>');
     }
 
     /**
@@ -211,7 +211,7 @@ class Parse
      */
     protected function parseEndforeach()
     {
-        $this->pregReplace('#@endforeach#', '<?php } ?>');
+        $this->pregReplace('#@endforeach\b#', '<?php } ?>');
     }
 
     /**
@@ -227,7 +227,7 @@ class Parse
      */
     protected function parseEndfor()
     {
-        $this->pregReplace('#@endfor#', '<?php } ?>');
+        $this->pregReplace('#@endfor\b#', '<?php } ?>');
     }
 
     /**
@@ -243,7 +243,7 @@ class Parse
      */
     protected function parseEndWhile()
     {
-        $this->pregReplace('#@endwhile#', '<?php } ?>');
+        $this->pregReplace('#@endwhile\b#', '<?php } ?>');
     }
 
     /**
@@ -267,7 +267,7 @@ class Parse
      */
     protected function parseElse()
     {
-        $this->pregReplace('#@else#', '<?php }else{ ?>');
+        $this->pregReplace('#@else\b#', '<?php }else{ ?>');
     }
 
     /**
@@ -275,7 +275,7 @@ class Parse
      */
     protected function parseEndIf()
     {
-        $this->pregReplace('#@endif#', '<?php } ?>');
+        $this->pregReplace('#@endif\b#', '<?php } ?>');
     }
 
     /**
