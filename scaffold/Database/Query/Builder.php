@@ -199,12 +199,6 @@ abstract class Builder
 
     abstract public function fetch();
 
-    abstract public function fetchRow();
-
-    abstract public function fetchPair();
-
-    abstract public function fetchGroup();
-
     abstract public function fetchAll();
 
     /**

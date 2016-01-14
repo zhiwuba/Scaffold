@@ -12,6 +12,9 @@
          bootstrap="./vendor/autoload.php"
 >
     <testsuites>
+        <testsuite name="database">
+            <directory>test/Database</directory>
+        </testsuite>
         <testsuite name="cache">
             <directory>test/Cache</directory>
         </testsuite>

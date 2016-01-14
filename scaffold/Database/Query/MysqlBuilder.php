@@ -10,10 +10,13 @@
 
 namespace Scaffold\Database\Query;
 
+use Scaffold\Database\Query\WhereTrait;
 use Scaffold\Helper\Utility;
 
 class MysqlBuilder extends Builder
 {
+    use WhereTrait;
+
 	/**
 	 * @var  \Scaffold\Database\Connector\MysqlConnector
 	 */
@@ -225,11 +228,6 @@ class MysqlBuilder extends Builder
 
     public function fetch()
     {
-        return $this->fetchRow();
-    }
-
-    public function fetchRow()
-    {
         if( in_array($this->scenario, ['select']) )
         {
             list($sql, $params)=$this->assemble();
@@ -246,16 +244,6 @@ class MysqlBuilder extends Builder
         {
             throw new \Exception("fetchRow only support select.");
         }
-    }
-
-    public function fetchPair()
-    {
-
-    }
-
-    public function fetchGroup()
-    {
-
     }
 
     public function fetchAll()
@@ -374,58 +362,6 @@ class MysqlBuilder extends Builder
 
         $sql="DELETE FROM {$this->table} WHERE $where";
         return array($sql, $bindings);
-    }
-
-	/**
-	* @param Where $where
-	 * @return array($expression, $bindings)
-	*/
-	protected function assembleWhere($where)
-	{
-		$bindings=[];
-		$parts=[];
-		foreach($where->getSubWhere() as $relation)
-		{
-			list($childExp, $childValues)=$this->assembleWhere($relation);
-			$parts[]='(' . $childExp  . ')';
-			$bindings=array_merge($bindings, $childValues);
-		}
-
-		$conditionsExp=[];
-		foreach($where->getSubCondition() as $condition)
-		{
-			$conditionsExp[]=$this->assembleCondition($condition);
-			$bindings=array_merge($bindings, $condition->values);
-		}
-
-		$operate=' ' . $where->getRelationOperate() . ' ';
-		$parts[]=implode($operate, $conditionsExp);
-
-		$parts=array_filter($parts, function($part){
-			return !empty($part);
-		});
-
-		$expression=implode($operate, $parts);
-
-		return array($expression, $bindings);
-	}
-
-    protected function assembleCondition(Condition $condition)
-    {
-        $parts=[];
-        $parts[]=$condition->name;
-        $parts[]=$condition->operate;
-        if(in_array($condition->operate, ['in', 'not in']))
-        {
-            $parts[]='(' . implode(',', array_fill(0, count($condition->values), '?')) . ')';
-        }
-        else
-        {
-            $parts[]='?';
-        }
-
-        $expression=implode(' ', $parts);
-        return $expression;
     }
 
     /**

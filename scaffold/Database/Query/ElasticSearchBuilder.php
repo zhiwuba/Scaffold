@@ -125,21 +125,6 @@ class ElasticSearchBuilder extends Builder
 		}
     }
 
-    public function fetchRow()
-    {
-        throw new BuilderException("ElasticSearch doesn't support fetchRow");
-    }
-
-    public function fetchPair()
-    {
-        throw new BuilderException("ElasticSearch doesn't support fetchPair");
-    }
-
-    public function fetchGroup()
-    {
-        throw new BuilderException("ElasticSearch doesn't support fetchGroup");
-    }
-
     public function fetchAll()
     {
         if( $this->scenario==='select' )

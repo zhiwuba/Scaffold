@@ -41,7 +41,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      */
     protected $cache=false;
 
-    public function __construct($attribute=[])
+    public function __construct(array $attribute=[])
     {
         $this->data=$attribute;
     }
@@ -81,7 +81,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
         {
             $key=array_combine(static::$primaryKey, $args);
-            return self::getBuilder()->where(self::getIdQuery($key))->fetchRow();
+            return self::getBuilder()->where(self::getIdQuery($key))->fetch();
         }
         else
         {
@@ -150,20 +150,27 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public function save()
     {
-        $modify=$this->getArrayCopy();
+        $newValues=$this->getNewValues();
         if( empty($this->data) )
         {
-            $ret=self::getBuilder()->insert()->values($modify)->execute();
+            $ret=self::getBuilder()->insert()->values($newValues)->execute();
             return $ret;
         }
         else
         {
-            if( !Utility::isSubSet($modify ,$this->data) )
-            {
-                $ret=self::getBuilder()->update()->set($modify)->where($this->getIdQuery())->execute();
-                return $ret;
-            }
+            $ret=self::getBuilder()->update()->set($newValues)->where($this->getIdQuery())->execute();
+            return $ret;
         }
+    }
+
+    /**
+     * Determine if the model or given attribute(s) have been modified.
+     *
+     * @return bool
+     */
+    public function isDirty()
+    {
+        return !Utility::isSubSet($this->getArrayCopy() ,$this->data);
     }
 
     /**
@@ -183,7 +190,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      * @return Where
      * @throws \Exception
     */
-    private static function getIdQuery(array $data=[])
+    public static function getIdQuery(array $data=[])
     {
         if( empty($data) ) {
             $data=&self::$data;
@@ -201,6 +208,11 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         return $where;
     }
 
+    protected function getNewValues()
+    {
+        return $this->getArrayCopy();
+    }
+
     /**
     * to json.
     */
@@ -209,18 +221,5 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         $copy=$this->getArrayCopy();
         $data=array_merge($copy, $this->data);
         return $data;
-    }
-
-    public function offsetExists($index){
-        parent::offsetExists($index);
-    }
-    public function offsetGet($index){
-        parent::offsetGet($index);
-    }
-    public function offsetSet($index, $value){
-        parent::offsetSet($index, $value);
-    }
-    public function offsetUnset($index){
-        parent::offsetUnset($index);
     }
 }

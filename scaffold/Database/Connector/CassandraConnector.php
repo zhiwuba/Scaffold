@@ -29,15 +29,19 @@ class CassandraConnector extends Connector
 	 * @return Session
 	 */
 	public function getConnection($name = '')
-	{
+                                                                                                                                                                                        	{
         if( !isset($this->connection) )
         {
-            if( is_string($this->configs) )
-                $points=$this->configs;
+            if( is_string($this->configs['hosts']) )
+                $points=$this->configs['hosts'];
             else
-                $points=implode(',', $this->configs);
+                $points=implode(',', $this->configs['hosts']);
 
-            $this->connection=Cassandra::cluster()->withContactPoints($points)->build()->connect();
+            $port=$this->configs['port'];
+            $keySpace=$this->configs['keyspace'];
+
+            $cluster=Cassandra::cluster()->withContactPoints($points)->withPort($port)->build();
+            $this->connection=$cluster->connect($keySpace);
         }
 		return $this->connection;
 	}
