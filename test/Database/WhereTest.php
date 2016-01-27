@@ -8,13 +8,13 @@
 
 
 
-require_once '../../vendor/autoload.php';
-require_once '../../scaffold/Database/Query/Where.php';
+namespace Test\Database;
 
 use Scaffold\Database\Query\Where;
+use Test\TestCase;
 
-class WhereTest extends PHPUnit_Framework_TestCase {
-
+class WhereTest extends  TestCase
+{
     public function testWhere()
     {
         $where=new Where(Where::$relationOR);

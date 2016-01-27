@@ -6,15 +6,15 @@
  * Time: 下午6:06
  */
 
-require_once '../../vendor/autoload.php';
-require_once '../../scaffold/Database/Query/MysqlBuilder.php';
+namespace Test\Database;
 
+use Test\TestCase;
 
-class MysqlQueryTest extends PHPUnit_Framework_TestCase
+class MysqlQueryTest extends TestCase
 {
     public function testMysql()
     {
-        $query=new \Sacaffold\Database\Query\MysqlQuery("paint");
+        $query=new \Scaffold\Database\Query\MysqlQuery("paint");
         $ret=$query
             ->select()
             ->leftJoin('comment', "comment.id=paint.id")

@@ -116,23 +116,37 @@ class CassandraBuilder extends Builder
      */
     public function count()
     {
-        $this->restrictScenario('select');
-
+        return $this->aggressive("count(*)");
     }
 
     public function max($column)
     {
-
+        return $this->aggressive("max($column)");
     }
 
     public function min($column)
     {
-
+        return $this->aggressive("min($column)");
     }
 
     public function sum($column)
     {
+        return $this->aggressive("sum($column)");
+    }
 
+    protected function aggressive($aggExp)
+    {
+        $this->restrictScenario('select');
+
+        $this->selects=[$aggExp];
+        list($sql, $params)=$this->assemble();
+        $statement=static::getConnection()->prepare($sql);
+        $options=new Cassandra\ExecutionOptions(
+            ['arguments'=>$params]+$this->options
+        );
+        $rows=static::getConnection()->execute($statement, $options);
+        $value=current($rows->first());
+        return $value->value();
     }
 
     protected function assembleSelect()
@@ -196,11 +210,19 @@ class CassandraBuilder extends Builder
             $bindings[]=$value;
         }
 
+        foreach($this->increments as $key=>$value)
+        {
+            if( $value>0 )
+                $pairs[]="$key=$key+$value";
+            else if($value<0)
+                $pairs[]="$key=$key$value";
+        }
+
         list($where, $params)=$this->assembleWhere($this->where);
         if( !empty($where) ) {
             $bindings=array_merge($bindings, $params);
         }else{
-            throw new \Exception("where must not be null in update.");
+            throw new BuilderException("where must not be null in update.");
         }
 
         $sql="UPDATE {$this->table} SET " . implode(',', $pairs) . " WHERE $where";
@@ -211,7 +233,7 @@ class CassandraBuilder extends Builder
     {
         list($where, $bindings)=$this->assembleWhere($this->where);
         if( empty($where) ){
-            throw new \Exception("where must not be null in delete.");
+            throw new BuilderException("where must not be null in delete.");
         }
 
         $sql="DELETE FROM {$this->table} WHERE $where";

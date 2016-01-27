@@ -13,6 +13,7 @@ namespace Scaffold\Database\Model;
 use Cassandra;
 use Cassandra\Type;
 use Scaffold\Database\Query\CassandraBuilder;
+use Scaffold\Helper\Utility;
 
 class CassandraModel extends Model
 {
@@ -22,17 +23,32 @@ class CassandraModel extends Model
 
     protected static $parsedColumns;
 
+    protected static $isCounter=false;
+
     /**
      * @inheritDoc
      */
     public static function instance($attribute)
     {
-        $data=[];
-        foreach($attribute as $key=>$value)
-        {
-            $data[$key]=static::object2data($value);
-        }
+        $data=static::mappingData($attribute);
         return parent::instance($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function save()
+    {
+        if( static::$isCounter )
+        {
+            $dirtyData=Utility::arrayExclude($this->getDirtyData(), static::$primaryKey);
+            $ret=self::getBuilder()->update()->increment($dirtyData)->where($this->getIdQuery())->execute();
+            return $ret;
+        }
+        else
+        {
+            return parent::save();
+        }
     }
 
     public static function getColumns($key)
@@ -48,12 +64,10 @@ class CassandraModel extends Model
             foreach(static::$columns as $name=>$struct)
             {
                 $types=explode(',' , trim(str_replace('>',  ',' , str_replace('<',  ',' ,$struct)), ','));
-                if( count($types)==1 )
-                {
+                if( count($types)==1 ) {
                     static::$parsedColumns[$name]=current($types);
                 }
-                else
-                {
+                else {
                     $key=array_shift($types);
                     static::$parsedColumns[$name]=[$key=>$types];
                 }
@@ -61,16 +75,29 @@ class CassandraModel extends Model
         }
     }
 
-    protected function getNewValues()
+    protected static function mappingObject(array $data)
     {
-        $newValues=[];
-        $copy=$this->getArrayCopy();
-        foreach($copy as $key=>$value)
-        {
+        $objects=[];
+        foreach($data as $key=>$value) {
             $type=static::getColumns($key);
-            $newValues[$key]=static::data2object($type, $value);
+            $objects[$key]=static::data2object($type, $value);
         }
-        return $newValues;
+        return $objects;
+    }
+
+    protected static function mappingData(array $objects)
+    {
+        $data=[];
+        foreach($objects as $key=>$value) {
+            $data[$key]=static::object2data($value);
+        }
+        return $data;
+    }
+
+    public static function processData($data)
+    {
+        $data=static::mappingObject($data);
+        return $data;
     }
 
     /**
@@ -116,17 +143,14 @@ class CassandraModel extends Model
      */
     protected static function fillObject($instance, $values)
     {
-        if( $instance instanceof Cassandra\Map )
-        {
-            foreach($values as $key=>$value)
-            {
+        if( $instance instanceof Cassandra\Map ) {
+            foreach($values as $key=>$value) {
                 $instance->set(static::data2object($instance->keyType(), $key), static::data2object($instance->valueType(),$value));
             }
         }
         else if( $instance instanceof Cassandra\Set || $instance instanceof Cassandra\Collection )
         {
-            foreach($values as $value)
-            {
+            foreach($values as $value) {
                 $instance->add(static::data2object($instance->type(),$value));
             }
         }
@@ -162,22 +186,22 @@ class CassandraModel extends Model
         }
     }
 
-
     /**
-     *  type 2 class
-     *
+     *  type to class
      * @param $type string
      * @return null|string
      */
     protected static function type2class($type)
     {
+        $class=null;
         $type=strtolower($type);
-        if( $type=='list' )
-            return 'Cassandra\\Collection';
-        else if( !in_array($type, ['text', 'varchar']))
-            return 'Cassandra\\' . ucfirst($type);
-        else
-            return null;
+        if( $type=='list' ){
+            $class='Cassandra\\Collection';
+        }
+        else if( !in_array($type, ['text', 'varchar', 'counter', 'int'])){
+            $class= 'Cassandra\\' . ucfirst($type);
+        }
+        return $class;
     }
 
 }

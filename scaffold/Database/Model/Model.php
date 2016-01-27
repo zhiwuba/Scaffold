@@ -17,24 +17,24 @@ use Scaffold\Helper\Utility;
 abstract class Model extends \ArrayObject implements \JsonSerializable
 {
     /**
-    *  @var string todo
+    *  @var string
     */
     protected static $tableName;
 
     /**
-    *  @var array todo
+    *  @var array
     */
     protected static $primaryKey=[];
 
     /**
-    *  @var string todo
+    *  @var string
     */
     protected static $builderClass;
 
     /**
     * @var array  different from ArrayObject.
      */
-    protected $data;
+    protected $originalData;
 
     /**
      * @var bool todo
@@ -43,7 +43,8 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
     public function __construct(array $attribute=[])
     {
-        $this->data=$attribute;
+        $this->originalData=$attribute;
+        parent::__construct($attribute);
     }
 
     /**
@@ -105,6 +106,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         else
         {
             $builder=self::getBuilder();
+
             foreach($args as $id)
             {
                 $key=array_combine(static::$primaryKey, $id);
@@ -150,15 +152,17 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public function save()
     {
-        $newValues=$this->getNewValues();
-        if( empty($this->data) )
+        $rawDirtyData=$this->getDirtyData();
+        $dirtyData=static::processData($rawDirtyData);
+
+        if( empty($this->originalData) )
         {
-            $ret=self::getBuilder()->insert()->values($newValues)->execute();
+            $ret=self::getBuilder()->insert()->values($dirtyData)->execute();
             return $ret;
         }
         else
         {
-            $ret=self::getBuilder()->update()->set($newValues)->where($this->getIdQuery())->execute();
+            $ret=self::getBuilder()->update()->set($dirtyData)->where($this->getIdQuery())->execute();
             return $ret;
         }
     }
@@ -170,8 +174,22 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      */
     public function isDirty()
     {
-        return !Utility::isSubSet($this->getArrayCopy() ,$this->data);
+        return !Utility::isSubSet($this->getArrayCopy() ,$this->originalData);
     }
+
+    public function getDirtyData()
+    {
+        $dirtyData=[];
+        foreach($this->getArrayCopy() as $key=>$value)
+        {
+            if( !array_key_exists($key, $this->originalData) || $this->originalData[$key]!==$value )
+            {
+                $dirtyData[$key]=$value;
+            }
+        }
+        return $dirtyData;
+    }
+
 
     /**
     *  get query object.
@@ -179,38 +197,45 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public static function getBuilder()
     {
+        /** @var Builder $query */
         $query=new static::$builderClass(static::$tableName);
         $query->setModel(get_called_class());
         return $query;
     }
 
+
     /**
      * get primary id query.
-     * @param $data array
+     * @param $keys array
      * @return Where
-     * @throws \Exception
     */
-    public static function getIdQuery(array $data=[])
+    public function getIdQuery(array $keys=[])
     {
-        if( empty($data) ) {
-            $data=&self::$data;
+        if( empty($keys) )
+        {
+            $copy=self::getArrayCopy();
+            $data=array_merge($this->originalData, $copy);
+            $keys=Utility::arrayPick($data, static::$primaryKey);
         }
 
+        $keys=static::processData($keys);
+
         $where=new Where();
-        foreach(static::$primaryKey as $key) {
-            if( isset($data[$key]) ) {
-                $where->andWhere($key, '=', $data[$key]);
-            }
-            else {
-                throw new \Exception("can't find primary key.");
-            }
+        foreach($keys as $key=>$value) {
+            $where->andWhere($key, '=', $value);
         }
         return $where;
     }
 
-    protected function getNewValues()
+    /**
+     * pre process some data
+     *
+     * @param $data
+     * @return mixed
+     */
+    public static function processData($data)
     {
-        return $this->getArrayCopy();
+        return $data;
     }
 
     /**
@@ -219,7 +244,8 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     public function jsonSerialize()
     {
         $copy=$this->getArrayCopy();
-        $data=array_merge($copy, $this->data);
+        $data=array_merge($copy, $this->originalData);
         return $data;
     }
+
 }

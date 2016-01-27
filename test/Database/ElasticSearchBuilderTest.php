@@ -8,11 +8,7 @@
  * file that was distributed with this source code.
  */
 
-require_once '../../vendor/autoload.php';
-require_once '../../scaffold/Database/Query/ElasticSearchBuilder.php';
-
-
-
+namespace Test\Database;
 
 class ElasticSearchBuilderTest extends \Test\TestCase
 {

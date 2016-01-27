@@ -137,70 +137,34 @@ class MysqlBuilder extends Builder
      */
     public function count()
     {
-        if( in_array($this->scenario, ['select']) )
-        {
-            $this->selects=['count(*)'];
-            list($sql, $params)=$this->assemble();
-            $stm=static::getConnection()->prepare($sql);
-            $stm->execute($params);
-            $count=current($stm->fetch());
-            return $count;
-        }
-        else
-        {
-            throw new \Exception("count only support select.");
-        }
+        return $this->aggressive("count(*)");
     }
 
     public function max($column)
     {
-        if( in_array($this->scenario, ['select']) )
-        {
-            $this->selects=["max($column)"];
-            list($sql, $params)=$this->assemble();
-            $stm=static::getConnection()->prepare($sql);
-            $stm->execute($params);
-            $count=current($stm->fetch());
-            return $count;
-        }
-        else
-        {
-            throw new \Exception("max only support select.");
-        }
+        return $this->aggressive("max($column)");
     }
 
     public function min($column)
     {
-        if( in_array($this->scenario, ['select']) )
-        {
-            $this->selects=["min($column)"];
-            list($sql, $params)=$this->assemble();
-            $stm=static::getConnection()->prepare($sql);
-            $stm->execute($params);
-            $count=current($stm->fetch());
-            return $count;
-        }
-        else
-        {
-            throw new \Exception("min only support select.");
-        }
+        return $this->aggressive("min($column)");
     }
 
     public function sum($column)
     {
-        if( in_array($this->scenario, ['select']) )
-        {
-            $this->selects=["sum($column)"];
-            list($sql, $params)=$this->assemble();
-            $stm=static::getConnection()->prepare($sql);
-            $stm->execute($params);
-            $count=current($stm->fetch());
-            return $count;
-        }
-        else
-        {
-            throw new \Exception("sum only support select.");
-        }
+        return $this->aggressive("sum($column)");
+    }
+
+    protected function aggressive($aggExp)
+    {
+        $this->restrictScenario('select');
+
+        $this->selects=[$aggExp];
+        list($sql, $params)=$this->assemble();
+        $stm=static::getConnection()->prepare($sql);
+        $stm->execute($params);
+        $result=current($stm->fetch());
+        return $result;
     }
 
     public function lastInsertId()
@@ -340,6 +304,14 @@ class MysqlBuilder extends Builder
         {
             $pairs[] =$key . '=?';
             $bindings[]=$value;
+        }
+
+        foreach($this->increments as $key=>$value)
+        {
+            if( $value>0 )
+                $pairs[]="$key=$key+$value";
+            elseif($value<0)
+                $pairs="$key=$key$value";
         }
 
         list($where, $params)=$this->assembleWhere($this->where);

@@ -85,6 +85,25 @@ class Utility
         return $result;
     }
 
+    public static function arrayPick(array &$array, array $keys)
+    {
+        $result=[];
+        foreach($keys as $key)
+        {
+            $result[$key]=$array[$key];
+        }
+        return $result;
+    }
+
+    public static function arrayExclude(array &$array1, array $keys)
+    {
+        foreach($keys as $key)
+        {
+            unset($array1[$key]);
+        }
+        return $array1;
+    }
+
     /**
     *  whether array1 is array2 's subset or not.
      * different from array_diff_assoc().

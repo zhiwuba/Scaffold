@@ -5,11 +5,12 @@
  * Date: 15-9-24
  * Time: 下午9:00
  */
-require_once '../../vendor/autoload.php';
+namespace Test\Database;
 
 use Scaffold\Database\Model\MysqlModel;
 use Scaffold\Database\Connector\MysqlConnector;
 use \Scaffold\Database\Query\MysqlBuilder;
+use Test\TestCase;
 
 class UserPostModel extends MysqlModel
 {
@@ -19,16 +20,8 @@ class UserPostModel extends MysqlModel
 }
 
 
-class ModelTest extends PHPUnit_Framework_TestCase
+class ModelTest extends TestCase
 {
-    protected function setUp()
-    {
-        $config=require_once "../../app/Configs/mysql.php";
-        $connector=MysqlConnector::loadConfig($config);
-        MysqlBuilder::setConnector($connector);
-        parent::setUp();
-    }
-
     public function testCreateModel()
     {
         $model=new UserPostModel();

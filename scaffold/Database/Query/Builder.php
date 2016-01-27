@@ -42,6 +42,8 @@ abstract class Builder
 
     protected $data=[];
 
+    protected $increments=[];
+
     protected $bindings=[];
 
     public function __construct($tableName)
@@ -85,28 +87,6 @@ abstract class Builder
     public function delete()
     {
         $this->scenario='delete';
-        return $this;
-    }
-
-    /**
-     *  update set
-     * @usage: set(a, b)  set([a=>b, c=>d])
-     */
-    public function set()
-    {
-        $args=func_get_args();
-        if ( Utility::isNormalArray($args) && count($args)==2 )
-        {
-            $this->data[$args[0]]=$args[1];
-        }
-        else if( Utility::isAssocArray($args[0]) )
-        {
-            $this->data=array_merge($this->data, $args[0]);
-        }
-        else
-        {
-            throw new \Exception("unsupported arguments");
-        }
         return $this;
     }
 
@@ -193,7 +173,47 @@ abstract class Builder
     }
 
     /**
-    *  trigger
+     *  update set
+     * eg:  set(a, b) or set([a=>b, c=>d])
+     */
+    public function set()
+    {
+        $args=func_get_args();
+        if ( Utility::isNormalArray($args) && count($args)==2 )
+        {
+            $this->data[$args[0]]=$args[1];
+        }
+        else if( Utility::isAssocArray($args[0]) )
+        {
+            $this->data=array_merge($this->data, $args[0]);
+        }
+        else
+        {
+            throw new \Exception("unsupported arguments");
+        }
+        return $this;
+    }
+
+    public function increment()
+    {
+        $args=func_get_args();
+        if( Utility::isNormalArray($args) && count($args)==2  )
+        {
+            $this->increments[$args[0]]=$args[1];
+        }
+        else if(Utility::isAssocArray($args[0]))
+        {
+            $this->increments=array_merge($this->increments, $args[0]);
+        }
+        else
+        {
+            throw new BuilderException("unsupported arguments");
+        }
+        return $this;
+    }
+
+    /**
+    *  select insert update delete
     */
     abstract public function execute();
 
@@ -202,7 +222,7 @@ abstract class Builder
     abstract public function fetchAll();
 
     /**
-    *  aggregation
+    *  aggregation function
     */
     abstract public function count();
 
@@ -213,14 +233,18 @@ abstract class Builder
     abstract public function sum($column);
 
     /**
-    *  model
-     * @param Model $model
+    *  set model of builder
+     * @param $model string
     */
     public function setModel($model)
     {
         $this->model=$model;
     }
 
+    /**
+     * get model of builder
+     * @return mixed
+     */
     public function getModel()
     {
         return $this->model;
@@ -228,9 +252,7 @@ abstract class Builder
 
     public function restrictScenario($scenario)
     {
-        if( (is_array($scenario)&&!in_array($this->scenario, $scenario)) ||
-            (is_string($scenario)&& $this->scenario!=$scenario))
-        {
+        if( (is_array($scenario)&&!in_array($this->scenario, $scenario)) || (is_string($scenario)&& $this->scenario!=$scenario)) {
             throw new BuilderException("operate is forbidden in this scenario");
         }
     }
@@ -240,10 +262,6 @@ abstract class Builder
      */
     public function assemble()
     {
-        if( empty( $this->scenario ) ) {
-            throw new \Exception("null scenario.");
-        }
-
         if( $this->scenario=='select' ) {
             return $this->assembleSelect();
         }else if ( $this->scenario=='insert' ) {
