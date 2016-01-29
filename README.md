@@ -1,26 +1,29 @@
-# Scaffold Design Document
-PHP Frame
+# Scaffold 
+##introduce
 
+## Feature list
+### Controller
 
-##Foundation
-1. router
-2. request response session cookie 
-3. mvc
-4. ORMapping
-5. plugin
+### View
 
+### Routing
 
-##Standard 
-1. psr1
-2. psr3
-3. psr4
-4. psr7
+### ORM
+1. Mysql
+2. Cassandra
+3. Elasticsearch
 
+### Http
+1. Request
+2. Response
+3. Url
 
+### Cache
+1. Redis
 
+### Middle
 
-##Component
-1. Redis Memcache
-2. Mysql MongoDB Cassandra
-3. ElasticSearch
+### Session
+1.Redis
+
 
