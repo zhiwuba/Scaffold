@@ -9,10 +9,6 @@
 */
 namespace Scaffold\Database\Query\ElasticSearch;
 
-class Filter
+class MustNot extends LogicBase
 {
-    public function addBool()
-    {
-
-    }
 }

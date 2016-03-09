@@ -7,30 +7,22 @@
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
 */
+
 namespace Scaffold\Database\Query\ElasticSearch;
 
 
-class Boolean
+class Query implements ClauseInterface
 {
-    protected $causes;
+    use ClauseTrait;
 
-    public function addShould()
+    protected $container;
+
+
+    /**
+     * @return mixed
+     */
+    public function toArray()
     {
-
-    }
-
-    public function addMust()
-    {
-
-    }
-
-    public function addMustNot()
-    {
-
-    }
-
-    public function addFilter()
-    {
-        //TODO
+        // TODO: Implement toArray() method.
     }
 }

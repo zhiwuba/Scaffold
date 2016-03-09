@@ -9,7 +9,11 @@
 */
 namespace Scaffold\Database\Query\ElasticSearch;
 
-class MustNot extends Logic
+/**
+ * Class Must
+ * @package Scaffold\Database\Query\ElasticSearch
+ */
+class Must extends LogicBase
 {
 
 }

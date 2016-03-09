@@ -12,7 +12,7 @@ abstract class CacheAdapter
 {
     public static $defaultTTL='86400'; //one day
     /**
-     * @var
+     * @var  todo static
      */
     protected $connection;
 

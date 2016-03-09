@@ -187,6 +187,23 @@ class Utility
         return $interval->days*86400+$interval->h*3600 +$interval->m*60+$interval->s;
     }
 
+    public static function randomBytes($length = 16)
+    {
+        if (PHP_MAJOR_VERSION >= 7 || defined('RANDOM_COMPAT_READ_BUFFER')) {
+            $bytes = random_bytes($length);
+        } elseif (function_exists('openssl_random_pseudo_bytes')) {
+            $bytes = openssl_random_pseudo_bytes($length, $strong);
+
+            if ($bytes === false || $strong === false) {
+                throw new \RuntimeException('Unable to generate random string.');
+            }
+        } else {
+            throw new \RuntimeException('OpenSSL extension or random_compat is required for PHP 5 users.');
+        }
+
+        return $bytes;
+    }
+
     /**
      *  generate global id
      *

@@ -11,7 +11,11 @@
 namespace Scaffold\Database\Query\ElasticSearch;
 
 
-class Query
+class Should extends LogicBase
+{
+}
+
+function newShould()
 {
 
 }

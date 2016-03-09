@@ -18,3 +18,9 @@ Router::get("hello/:id", function($id){
 
 Router::get("list/:id",  "MainController@getList");
 
+Router::get("session", function(){
+    $session=new \Scaffold\Session\Session();
+    $_SESSION['aa']=12;
+    echo $_SESSION['aa'],"\n";
+    echo session_id();
+});
