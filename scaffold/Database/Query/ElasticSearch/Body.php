@@ -36,9 +36,45 @@ class Body implements ClauseInterface
         return $this;
     }
 
-    public function addSort()
+    /**
+     *  control how the _source field is returned with every hit.
+     * @param $source mixed false|string|array
+     * @return $this
+     */
+    public function addSource($source)
     {
+        $this->container['_source']=$source;
+        return $this;
+    }
 
+    /**
+     * @param $field
+     * @param $order  string  asc|desc
+     * @param $mode string min|max|sum|avg|median
+     * @return $this
+     */
+    public function addSort($field, $order, $mode=null )
+    {
+        $this->container['sort'][]=[$field=>['order'=>$order, 'mode'=>$mode]];
+        return $this;
+    }
+
+    /**
+     * Pagination of results can be done by using the from and size parameters
+     * @param int $from
+     * @param int $size
+     * @return $this
+     */
+    public function addFromSize($from=null, $size=null)
+    {
+        $this->container['from']=$from ?: 0;
+        $this->container['size']=$size ?: 100;
+        return $this;
+    }
+
+    public function addHeightLight()
+    {
+        //TODO
     }
 
 
@@ -50,7 +86,11 @@ class Body implements ClauseInterface
         $clauses=[];
         foreach($this->container as $key=>$value)
         {
-            $clauses[$key]=$value->toArray();
+            if( is_object($value) ){
+                $clauses[$key]=$value->toArray();
+            }else{
+                $clauses[$key]=$value;
+            }
         }
         return $clauses;
     }

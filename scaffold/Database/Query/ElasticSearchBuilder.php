@@ -10,6 +10,13 @@
 
 namespace Scaffold\Database\Query;
 
+use Scaffold\Database\Query\ElasticSearch\Boolean;
+use Scaffold\Database\Query\ElasticSearch\Body;
+use Scaffold\Database\Model\ElasticSearchModel;
+use Scaffold\Database\Query\ElasticSearch\Filter;
+use Scaffold\Database\Query\ElasticSearch\Logic;
+use Scaffold\Database\Query\ElasticSearch\Term;
+
 class ElasticSearchBuilder extends Builder
 {
 	/**
@@ -38,31 +45,25 @@ class ElasticSearchBuilder extends Builder
 	*/
 	protected $id;
 
-	/**
-	*  switch index to operate.
-	 * @param string $index
-	 * @return $this
-	*/
-	public function switchIndex($index)
+	public function getBaseParam()
 	{
-		$this->index=$index;
+		$param=[
+			'routing'=>$this->routing,
+			'index'=>$this->index,
+			'type'=>$this->table,
+		];
+		return $param;
+	}
+
+	public function setBaseParam($params)
+	{
+		if( isset($params['index']) )
+			$this->index=$params['index'];
+		if(isset($params['routing']))
+			$this->routing=$params['routing'];
+		if(isset($params['id']))
+			$this->id=$params['id'];
 		return $this;
-	}
-
-	/**
-	* @var $routing
-	*/
-	public function setRouting($routing)
-	{
-		$this->routing=$routing;
-	}
-
-	/**
-	* @param string $id
-	*/
-	public function setId($id)
-	{
-		$this->id=$id;
 	}
 
     /**
@@ -114,28 +115,20 @@ class ElasticSearchBuilder extends Builder
 
     public function fetch()
 	{
-		if ( $this->scenario==='select' )
-        {
-			$result = $this->search();
-			return $result;
-		}
-		else
-		{
-			throw new BuilderException("ElasticSearch fetch only support select");
-		}
+        $this->restrictScenario('select');
+
+        $response = $this->search();
+        $models=$this->responseToModels($response);
+        return count($models)? $models[0] : null ;
     }
 
     public function fetchAll()
     {
-        if( $this->scenario==='select' )
-        {
-			$result=$this->search();
-            return $result;
-        }
-        else
-        {
-            throw new BuilderException("ElasticSearch fetchAll only support select");
-        }
+        $this->restrictScenario('select');
+
+        $response=$this->search();
+        $models=$this->responseToModels($response);
+        return $models;
     }
 
     /**
@@ -171,15 +164,17 @@ class ElasticSearchBuilder extends Builder
 
     protected function assembleSelect()
     {
-		$body=[];
+        $body=new Body();
 
         if( !empty($this->selects) ) {
-            $body['_source']=$this->selects;
+            $body->addSource($this->selects);
         }
 
-		$where=$this->assembleWhere($this->where);
+		$bool=$this->assembleWhere($this->where);
 		if( !empty($where) ) {
-			$body['query']['filtered']['filter']=$where;
+            $filter=new Filter();
+            $filter->addBool($bool);
+            $body->addFilter($filter);
 		}
 
         if( !empty($this->groups) ) {
@@ -188,20 +183,16 @@ class ElasticSearchBuilder extends Builder
 
 		if( !empty($this->orders) ) {
 			foreach($this->orders as $field=>$order) {
-				$body['sort'][]=[$field=>['order'=>$order]];
+                $body->addSort($field, $order);
 			}
 		}
 
-		if( !empty($this->skip) ) {
-			$body['from']=$this->skip;
-		}
-
-		if( !empty($this->take) ) {
-			$body['size']=$this->take;
+		if( !empty($this->skip) || !empty($this->take) ) {
+            $body->addFromSize($this->skip, $this->take);
 		}
 
 		$params=$this->getBaseParam();
-		$params['body']=$body;
+		$params['body']=$body->toArray();
 		return $params;
     }
 
@@ -217,7 +208,33 @@ class ElasticSearchBuilder extends Builder
     {
 		$params=$this->getBaseParam();
 		$params['id']=$this->id;
-		$params['body']=$this->data;
+        if( !empty($this->data) )
+        {
+            $params['body']['doc']=$this->data;
+        }
+
+		$scripts=[];
+		$script_params=[];
+		foreach($this->getIncrements() as $key=>$value)
+		{
+			$count_name='count_'.$key;
+			if($value>0) {
+				$scripts[]="ctx._source.$key+=$count_name";
+			}
+			elseif($value<0){
+				$scripts[]="ctx._source.$key-=$count_name";
+			}
+			else{
+				continue;
+			}
+			$script_params[$count_name]= abs($value);
+		}
+		if( !empty($scripts) && !empty($script_params) )
+		{
+			$params['body']['script']=implode(';', $scripts);
+			$params['body']['params']=$script_params;
+		}
+
 		return $params;
 	}
 
@@ -230,111 +247,119 @@ class ElasticSearchBuilder extends Builder
 
 	/**
 	 * @param Where $where
-	 * @return array($expression, $bindings)
+	 * @return \Scaffold\Database\Query\ElasticSearch\Boolean;
 	 */
 	protected function assembleWhere($where)
 	{
-		$parts=[];
-		$operate=$where->getRelationOperate();
-		foreach($where->getSubWhere() as $subWhere)
-		{
-			$segment=$this->assembleWhere($subWhere);
-			if( $operate==Where::$relationAND )
-			{
-				$parts["must"][]=$segment;
-			}
-			else if( $operate==Where::$relationOR )
-			{
-				$parts["should"][]=$segment;
-			}
-		}
+        $bool=new Boolean();
+        $logic=new Logic();
+
+        if( !empty($where->getSubWhere()) )
+        {
+            foreach($where->getSubWhere() as $subWhere)
+            {
+                $logic->addBool($this->assembleWhere($subWhere));
+            }
+        }
 
 		foreach($where->getSubCondition() as $condition)
 		{
-			$segment=$this->buildCondition($condition);
-			if( $condition->isNegative() )
-			{
-				$parts["must_not"][]=$segment;
-			}
-			else if( $condition->isFuzzy() )
-			{
-				$parts['query']=$segment;
-			}
-			else if( $condition->relation==Where::$relationAND )
-			{
-				$parts["must"][]=$segment;
-			}
-			else if( $condition->relation==Where::$relationOR )
-			{
-				$parts["should"][]=$segment;
-			}
+			$term=$this->buildCondition($condition);
+            $logic->addTerm($term);
 		}
-		return ["bool"=>$parts];
+
+        $operate=$where->getRelationOperate();
+        if( $operate==Where::$relationAND )
+        {
+            $bool->addMust($logic);
+        }
+        else if( $operate==Where::$relationOR )
+        {
+            $bool->addShould($logic);
+        }
+        else
+        {
+            return []; //TODO
+        }
+		return $bool;
 	}
 
 	/**
 	*  build condition
 	 * @param $condition Condition
-	 * @return array
+	 * @return Term
 	*/
 	protected function buildCondition(Condition $condition)
 	{
-		$express=[];
+        $term=new Term();
+        $field=$condition->name;
 		$values=$condition->values;
-		$name=$condition->name;
 		switch( $condition->operate )
 		{
 			case '=':
 				if( in_array($values[0], ['null', 'NULL', null]) )
 				{
-					$express['missing']=['field'=>$name];
+                    $term->missing($field);
 				}
 				else
 				{
-					$express['term']=[$name => $values[0]];
+                    $term->term($field, $values[0]);
 				}
 				break;
 			case '!=':
 				if( in_array($values[0], ['null', 'NULL', null]) )
 				{
-					$express['exists']=['field'=>$name];
+                    $term->exists($field);
 				}
 				else
 				{
-					$express['term']=[$name=>$values[0]];
+                    //TODO
 				}
 				break;
 			case '>':
-				$express['range'][$name][]=['gt'=>$values[0]];
+                $term->range($field, ['gt'=>$values[0]]);
 				break;
 			case '>=':
-				$express['range'][$name][]=['gte'=>$values[0]];
+                $term->range($field, ['gte'=>$values[0]]);
 				break;
 			case '<':
-				$express['range'][$name][]=['lt'=>$values[0]];
+                $term->range($field, ['lt'=>$values[0]]);
 				break;
 			case '<=':
-				$express['range'][$name][]=['lte'=>$values[0]];
+                $term->range($field, ['lte'=>$values[0]]);
 				break;
 			case 'in':
-				$express['terms'][$name]=$values;
+                $term->terms($field, $values);
 				break;
 			case 'not in':
-				$express['terms'][$name]=$values;
+                //TODO
 				break;
 			default:
 				break;
 		}
-		return $express;
+		return $term;
 	}
 
-    private function getBaseParam()
+	protected function responseToModels($response)
     {
-		$param=[
-			'routing'=>$this->routing,
-			'index'=>$this->index,
-			'type'=>$this->table,
-		];
-        return $param;
+        if( !empty($this->model) )
+        {
+            $models=[];
+            foreach($response['hits']['hits'] as $hit)
+            {
+                /** @var ElasticSearchModel $model */
+                $model=call_user_func([$this->model, 'instance'], $hit['_source']);
+                $models[]=$model;
+            }
+            return $models;
+        }
+        else
+        {
+            return $response['hits']['hits'];
+        }
     }
+
+	// term options
+	//file:///home/explorer/.local/share/Zeal/Zeal/docsets/ElasticSearch.docset/Contents/Resources/Documents/www.elastic.co/guide/en/elasticsearch/reference/current/term-level-queries.html
+
 }

@@ -23,6 +23,10 @@ abstract class Builder
 
     protected $table;
 
+    /**
+     *  model 's class name
+     * @var \Scaffold\Database\Model\Model
+     */
     protected $model;
 
     protected $selects=[];
@@ -61,6 +65,34 @@ abstract class Builder
 	{
 		return static::$profile;
 	}
+
+    /**
+     *  set model of builder
+     * @param $model string
+     */
+    public function setModel($model)
+    {
+        $this->model=$model;
+    }
+
+    /**
+     * get model of builder
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    public function getIncrements()
+    {
+        return $this->increments;
+    }
+
+    public function setIncrements($increments)
+    {
+        $this->increments=array_merge($this->increments , $increments);
+        return $this;
+    }
 
     /**
     *  CRUD
@@ -179,6 +211,7 @@ abstract class Builder
     public function set()
     {
         $args=func_get_args();
+
         if ( Utility::isNormalArray($args) && count($args)==2 )
         {
             $this->data[$args[0]]=$args[1];
@@ -231,24 +264,6 @@ abstract class Builder
     abstract public function min($column);
 
     abstract public function sum($column);
-
-    /**
-    *  set model of builder
-     * @param $model string
-    */
-    public function setModel($model)
-    {
-        $this->model=$model;
-    }
-
-    /**
-     * get model of builder
-     * @return mixed
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
 
     public function restrictScenario($scenario)
     {

@@ -20,19 +20,19 @@ class Boolean implements ClauseInterface
 
     protected $container;
 
-    public function addShould(Should $should)
+    public function addShould(Logic $should)
     {
         $this->container['should']=$should;
         return $this;
     }
 
-    public function addMust(Must $must)
+    public function addMust(Logic $must)
     {
         $this->container['must']=$must;
         return $this;
     }
 
-    public function addMustNot(MustNot $mustNot)
+    public function addMustNot(Logic $mustNot)
     {
         $this->container['must_not']=$mustNot;
         return $this;

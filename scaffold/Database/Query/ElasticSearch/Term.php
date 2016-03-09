@@ -40,6 +40,18 @@ class Term implements ClauseInterface
         return $this;
     }
 
+
+    /**
+     * @param $field
+     * @param $ranges array gte|gt|lte|lt
+     * @return $this
+     */
+    public function range($field, $ranges)
+    {
+        $this->container=['range'=>[$field=>$ranges]];
+        return $this;
+    }
+
     /**
      * Find documents where the field specified contains any non-null value.
      * @param $field

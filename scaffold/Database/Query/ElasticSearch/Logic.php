@@ -10,7 +10,7 @@
 namespace Scaffold\Database\Query\ElasticSearch;
 
 
-class LogicBase implements ClauseInterface
+class Logic implements ClauseInterface
 {
     use ClauseTrait;
 
@@ -20,6 +20,11 @@ class LogicBase implements ClauseInterface
     {
         $this->container[]=$term;
         return $this;
+    }
+
+    public function addBool(Boolean $bool)
+    {
+        $this->container[]=$bool;
     }
 
     /**

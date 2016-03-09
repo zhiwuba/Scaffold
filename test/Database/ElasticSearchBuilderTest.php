@@ -128,10 +128,40 @@ $dd=<<<EOF
 EOF;
 
 
+$ee=<<<EOF
 
+->andWhere(
+    $this->orWhere()->orWhere()
+)->andWhere(
 
+)
 
+   "filter": {
+      "bool": {
+         "must": [
+            {
+               "bool": {
+                  "should": [
+                     {
+                        "term": {
+                           "comments": "778"
+                        }
+                     },
+                     {
+                        "term": {
+                           "comments": "5425"
+                        }
+                     }
+                  ]
+               }
+            },
+            {
+                "term": {
+                   "name": "peter"
+                }
+            }
+         ]
+      }
+   }
 
-
-
-
+EOF;
