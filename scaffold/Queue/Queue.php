@@ -11,6 +11,20 @@
 
 class Queue
 {
+
+    static $adapter;
+
+    public static function getAdapter()
+    {
+        return static::$adapter;
+    }
+
+    public static function setAdapter($adapter)
+    {
+        static::$adapter=$adapter;
+    }
+
+
     public function push()
     {
 
