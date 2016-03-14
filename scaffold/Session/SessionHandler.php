@@ -6,9 +6,44 @@
  * Time: 下午7:39
  */
 
+namespace Scaffold\Session;
 
-class RedisSessionHandler implements  SessionHandlerInterface
+use Scaffold\Helper\Utility;
+use Scaffold\Session\Adapter\SessionAdapter;
+
+class SessionHandler implements  \SessionHandlerInterface
 {
+    /**
+     * @var SessionAdapter
+     */
+    protected static $adapter;
+
+    public static function getAdapter()
+    {
+        return static::$adapter;
+    }
+
+    public static function setAdapter($adapter)
+    {
+        static::$adapter=$adapter;
+    }
+
+    /**
+     *  create session id.
+     * @return string
+     */
+    public function create_sid()
+    {
+        do{
+            $session_id=bin2hex(Utility::randomBytes(16));
+            if( !static::$adapter->exists($session_id) ) {
+                break;
+            }
+        }
+        while(true);
+        return $session_id;
+    }
+
     /**
      * PHP >= 5.4.0<br/>
      * Close the session
@@ -20,7 +55,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function close()
     {
-
+        return true;
     }
 
     /**
@@ -35,6 +70,8 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function destroy($session_id)
     {
+        static::$adapter->del($session_id);
+        return true;
     }
 
     /**
@@ -52,6 +89,8 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function gc($maxlifetime)
     {
+        static::$adapter->expire($maxlifetime);
+        return true;
     }
 
     /**
@@ -67,6 +106,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function open($save_path, $session_id)
     {
+        return true;
     }
 
     /**
@@ -82,6 +122,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function read($session_id)
     {
+        return static::$adapter->get($session_id);
     }
 
     /**
@@ -103,7 +144,7 @@ class RedisSessionHandler implements  SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
-
+        static::$adapter->set($session_id, $session_data);
+        return true;
     }
-
 }

@@ -11,17 +11,24 @@ namespace Scaffold\Session;
 class Session
 {
     protected $session;
-    protected $driver;
 
     public function __construct()
     {
+        $handler=new SessionHandler();
+        session_set_save_handler($handler, true);
+        session_name('session_id');
         session_start();
         $this->session=$_SESSION;
     }
 
-    public function setDriver()
+    public static function setAdapter($adapter)
     {
+        SessionHandler::setAdapter($adapter);
+    }
 
+    public static function getAdapter()
+    {
+        return SessionHandler::getAdapter();
     }
 
     public function get()
@@ -34,6 +41,11 @@ class Session
      * eg: put('key', 'value');
     */
     public function put()
+    {
+
+    }
+
+    public function has()
     {
 
     }
