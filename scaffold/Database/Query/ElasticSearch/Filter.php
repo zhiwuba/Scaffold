@@ -13,8 +13,6 @@ class Filter implements ClauseInterface
 {
     use ClauseTrait;
 
-    protected $container;
-
     public function addBool(Boolean $bool)
     {
         $this->container['bool']=$bool;

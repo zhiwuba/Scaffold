@@ -12,13 +12,10 @@ namespace Scaffold\Database\Query\ElasticSearch;
 /**
  * Class Boolean
  * @package Scaffold\Database\Query\ElasticSearch
- *
  */
 class Boolean implements ClauseInterface
 {
     use ClauseTrait;
-
-    protected $container;
 
     public function addShould(Logic $should)
     {
@@ -38,9 +35,10 @@ class Boolean implements ClauseInterface
         return $this;
     }
 
-    public function addFilter()
+    public function addFilter(Filter $filter)
     {
-        //TODO
+        $this->container['filter']=$filter;
+        return $this;
     }
 
     /**
@@ -56,12 +54,4 @@ class Boolean implements ClauseInterface
         return $clauses;
     }
 
-}
-
-/**
- * @return Boolean
- */
-function newBoolean()
-{
-    return new Boolean();
 }

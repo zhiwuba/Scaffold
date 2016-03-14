@@ -14,8 +14,6 @@ class Term implements ClauseInterface
 {
     use ClauseTrait;
 
-    protected $container=[];
-
     /**
      *  Find documents which contain the exact term specified in the field specified.
      * @param $field
@@ -149,13 +147,13 @@ class Term implements ClauseInterface
     /**
      * @param $field
      * @param $value
+     * @return $this
      */
     public function match($field, $value)
     {
         $this->container=['match'=>[$field=>$value]];
         return $this;
     }
-
 
     /**
      * @return mixed

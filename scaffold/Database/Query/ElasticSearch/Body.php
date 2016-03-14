@@ -10,19 +10,10 @@
 
 namespace Scaffold\Database\Query\ElasticSearch;
 
-/**
- * @return Body
- */
-function newBody()
-{
-   return new Body();
-}
 
 class Body implements ClauseInterface
 {
     use ClauseTrait;
-
-    public $container=[];
 
     public function addFilter(Filter $filter)
     {

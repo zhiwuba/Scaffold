@@ -171,10 +171,8 @@ class ElasticSearchBuilder extends Builder
         }
 
 		$bool=$this->assembleWhere($this->where);
-		if( !empty($where) ) {
-            $filter=new Filter();
-            $filter->addBool($bool);
-            $body->addFilter($filter);
+		if( !$bool->isEmpty() ) {
+            $body->addFilter((new Filter())->addBool($bool));
 		}
 
         if( !empty($this->groups) ) {
@@ -253,6 +251,7 @@ class ElasticSearchBuilder extends Builder
 	{
         $bool=new Boolean();
         $logic=new Logic();
+        $notLogic=new Logic();
 
         if( !empty($where->getSubWhere()) )
         {
@@ -264,24 +263,36 @@ class ElasticSearchBuilder extends Builder
 
 		foreach($where->getSubCondition() as $condition)
 		{
-			$term=$this->buildCondition($condition);
-            $logic->addTerm($term);
+            $term=$this->buildCondition($condition);
+            if( $condition->isNot() )
+            {
+                $notLogic->addTerm($term);
+            }
+            else
+            {
+                $logic->addTerm($term);
+            }
 		}
 
-        $operate=$where->getRelationOperate();
-        if( $operate==Where::$relationAND )
+        if( !$logic->isEmpty() )
         {
-            $bool->addMust($logic);
+            $operate=$where->getRelationOperate();
+            if( $operate==Where::$relationAND )
+            {
+                $bool->addMust($logic);
+            }
+            else if( $operate==Where::$relationOR )
+            {
+                $bool->addShould($logic);
+            }
         }
-        else if( $operate==Where::$relationOR )
+
+        if( !$notLogic->isEmpty() )
         {
-            $bool->addShould($logic);
+            $bool->addMustNot($notLogic);
         }
-        else
-        {
-            return []; //TODO
-        }
-		return $bool;
+
+        return $bool;
 	}
 
 	/**
@@ -313,7 +324,7 @@ class ElasticSearchBuilder extends Builder
 				}
 				else
 				{
-                    //TODO
+                    $term->term($field, $values[0]);
 				}
 				break;
 			case '>':
@@ -332,8 +343,11 @@ class ElasticSearchBuilder extends Builder
                 $term->terms($field, $values);
 				break;
 			case 'not in':
-                //TODO
+                $term->terms($field, $values);
 				break;
+            case 'regexp':
+                $term->regexp($field, $values[0]);
+                break;
 			default:
 				break;
 		}
@@ -358,8 +372,4 @@ class ElasticSearchBuilder extends Builder
             return $response['hits']['hits'];
         }
     }
-
-	// term options
-	//file:///home/explorer/.local/share/Zeal/Zeal/docsets/ElasticSearch.docset/Contents/Resources/Documents/www.elastic.co/guide/en/elasticsearch/reference/current/term-level-queries.html
-
 }

@@ -57,7 +57,7 @@ class Condition
 	 *  check whether operate is Negate or not.
 	 * @return bool
 	 */
-	public function isNegative()
+	public function isNot()
 	{
 		$ret=in_array($this->operate, ['!=',  'not in']);
 		return $ret;
@@ -111,6 +111,7 @@ class Where
 {
     public static $relationOR='OR';
     public static $relationAND='AND';
+    public static $relationNOT='NOT';
 
     /**
     *  @enum or and
@@ -155,11 +156,12 @@ class Where
     /**
     *  orWhere
      * eg: orWhere()->orWhere()
+     * eg: orWhere($this->andWhere()->andWhere())->orWhere();
     */
     public function orWhere()
     {
         $args=func_get_args();
-        if( $this->relationOperate!==static::$relationAND)
+        if( $this->relationOperate!==static::$relationAND )
         {
             $this->relationOperate=static::$relationOR;
 			call_user_func_array(array($this, 'addWhere'), $args);

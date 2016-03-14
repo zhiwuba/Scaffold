@@ -10,10 +10,20 @@
 
 namespace Scaffold\Database\Query\ElasticSearch;
 
-use Scaffold\Exception\Exception;
-
 trait ClauseTrait
 {
+    /**
+     * @var ClauseInterface[]|string[]
+     */
+    protected $container=[];
+
+    /**
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->container);
+    }
 
     /**
      * @return static

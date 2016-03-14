@@ -14,8 +14,6 @@ class Logic implements ClauseInterface
 {
     use ClauseTrait;
 
-    protected $container=[];
-
     public function addTerm(Term $term)
     {
         $this->container[]=$term;
@@ -24,7 +22,8 @@ class Logic implements ClauseInterface
 
     public function addBool(Boolean $bool)
     {
-        $this->container[]=$bool;
+        $this->container['bool']=$bool;
+        return $this;
     }
 
     /**
@@ -33,9 +32,9 @@ class Logic implements ClauseInterface
     public function toArray()
     {
         $items=[];
-        foreach($this->container as $term)
+        foreach($this->container as $key=>$item)
         {
-            $items[]=$term->toArray();
+            $items[$key]=$item->toArray();
         }
         return $items;
     }

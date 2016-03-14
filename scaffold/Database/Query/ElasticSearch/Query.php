@@ -15,7 +15,25 @@ class Query implements ClauseInterface
 {
     use ClauseTrait;
 
-    protected $container;
+    /**
+     * @param Boolean $bool
+     * @return $this
+     */
+    public function addBool(Boolean $bool)
+    {
+        $this->container['bool']=$bool;
+        return $this;
+    }
+
+    /**
+     * @param $min
+     * @return $this
+     */
+    public function addMinShouldMatch($min)
+    {
+        $this->container['minimum_should_match']=$min;
+        return $this;
+    }
 
 
     /**

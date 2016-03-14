@@ -42,6 +42,14 @@ class PaintModel extends ElasticSearchModel
                         'type'=>'string',
                         'index'=>'not_analyzed'
                     ],
+                    'author'=>[
+                        'type'=>'string',
+                        'index'=>'not_analyzed'
+                    ],
+                    'mark'=>[
+                        'type'=>'string',
+                        'index'=>'analyzed'
+                    ],
                     'created_at'=>[
                         'type'=>'date'
                     ],
@@ -62,12 +70,83 @@ class ElasticSearchModelTest extends TestCase
     public function NtestNew()
     {
         $names=['john', 'kim', 'david', 'Michael', 'Lily', 'William', 'Peter', 'Rachel', 'Daniel', 'Elizabeth'];
+        $author=['Camila', 'Eira','Eleanora', 'Ellen', 'Emerson', 'Estelle', 'Everly', 'Gaia', 'Indie', 'Ione', 'Isobel', 'Jocelyn', 'Judith', 'Kaia', 'Kalila', 'Liliana', 'Lucille', 'Marin', 'Marley', 'Meilani', 'Mireille', 'Norah', 'Orla', 'Paloma', 'Pandora', 'Peyton','Polly'];
+        $mark=[
+'optimistic
+independent
+out-going
+active
+able
+adaptable
+active
+aggressive
+ambitious
+amiable
+amicable
+analytical
+apprehensive
+aspiring
+audacious
+capable
+careful
+candid
+competent
+constructive
+cooperative
+creative
+dedicated
+dependable
+diplomatic
+disciplined
+dutiful
+well--educated
+efficient
+energetic
+expressivity
+faithful
+frank
+generous
+genteel
+gentle
+humorous
+impartial
+independent
+industrious
+ingenious
+motivated
+intelligent
+learned
+logical
+methodical
+modest
+objective
+precise
+punctual
+realistic
+responsible
+sensible
+porting
+steady
+systematic
+purposeful
+sweet-tempered
+temperate
+tireless
+Personality' ];
+
+        $marks=explode('\n', $mark);
+
         for($i=2; $i<3000;$i++)
         {
             $paint=new PaintModel();
             $paint['id']=$i;
             $paint['name']= $names[rand(0, count($names)-1)];
             $paint['filename']=$paint['name'] . '\'s file, code is ' . $i;
+            $paint['author']=$author[rand(0, count($author)-1)];
+
+            shuffle($marks);
+
+            $paint['mark']= array_slice($marks , 0, rand(1, count($marks)));
             $paint['created_at']='2012-02-06';
             $paint['comments']=rand(0,10000);
             $paint['likes']=rand(0, 10000);

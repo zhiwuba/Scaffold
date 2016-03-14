@@ -27,9 +27,23 @@ class ElasticSearchBuilderTest extends \Test\TestCase
 
     public function testSelect2()
     {
-        $ret=$this->builder->select()->andWhere('post_id', '!=', 10)->andWhere('thread_id', '=', 20)->assemble();
+        $ret=$this->builder->select()->andWhere('post_id', '!=', 10)->andWhere('post_id', '!=', 20)->andWhere('thread_id', '=', 20)->assemble();
         echo json_encode($ret, JSON_PRETTY_PRINT);
     }
+
+    public function testSelect3()
+    {
+        $ret=$this->builder->select()
+        ->orWhere(function($query){
+            $query->andWhere(function($query){
+                $query->orWhere('post_id', '=', 10 )->orWhere('post_id', '=', 11);
+            })->andWhere('thread_id', '=', 20);
+        })->orWhere(function($query){
+            $query->andWhere('post_id', '!=', 10)->andWhere('thread_id', '!=', 20);
+        })->assemble();
+        echo json_encode($ret, JSON_PRETTY_PRINT);
+    }
+
 }
 
 
@@ -69,6 +83,7 @@ A & !B
 EOF;
 
 $cc=<<<EOF
+
 (A or B) & (C or D)
 "bool":
 {
@@ -131,7 +146,7 @@ EOF;
 $ee=<<<EOF
 
 ->andWhere(
-    $this->orWhere()->orWhere()
+    this->orWhere()->orWhere()
 )->andWhere(
 
 )
