@@ -8,7 +8,7 @@
 * file that was distributed with this source code.
 */
 
-namespace Scaffold\Database\Query\ElasticSearch;
+namespace Scaffold\Database\Query\DSL;
 
 
 class Query implements ClauseInterface

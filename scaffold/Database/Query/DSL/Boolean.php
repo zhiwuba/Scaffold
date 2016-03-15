@@ -7,11 +7,11 @@
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
 */
-namespace Scaffold\Database\Query\ElasticSearch;
+namespace Scaffold\Database\Query\DSL;
 
 /**
  * Class Boolean
- * @package Scaffold\Database\Query\ElasticSearch
+ * @package Scaffold\Database\Query\DSL
  */
 class Boolean implements ClauseInterface
 {

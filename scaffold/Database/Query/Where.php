@@ -17,7 +17,20 @@ class Condition
 	/**
 	* @var array
 	*/
-	public static $supportOperate=[ '=',  '!=', '>=', '>', '<=', '<', 'in' , 'not in', 'like'];
+	public static $supportOperate=[
+        '=', '<', '>', '<=', '>=', '<>', '!=',
+        'like', 'like binary', 'not like', 'between', 'ilike',
+        '&', '|', '^', '<<', '>>',
+        'rlike', 'regexp', 'not regexp',
+        '~', '~*', '!~', '!~*',
+        'similar to', 'not similar to',
+        'in' , 'not in',
+    ];
+
+    public static $negativeOperate=[
+        '!=', '<>' ,'not like', 'not regexp', 'not in', 'not similar to'
+    ];
+
 
     /**
      *  @var string
@@ -59,8 +72,7 @@ class Condition
 	 */
 	public function isNot()
 	{
-		$ret=in_array($this->operate, ['!=',  'not in']);
-		return $ret;
+		return in_array($this->operate,  static::$negativeOperate);
 	}
 
     public function isFuzzy()
@@ -156,7 +168,6 @@ class Where
     /**
     *  orWhere
      * eg: orWhere()->orWhere()
-     * eg: orWhere($this->andWhere()->andWhere())->orWhere();
     */
     public function orWhere()
     {

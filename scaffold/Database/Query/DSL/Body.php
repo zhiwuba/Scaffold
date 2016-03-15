@@ -8,7 +8,7 @@
 * file that was distributed with this source code.
 */
 
-namespace Scaffold\Database\Query\ElasticSearch;
+namespace Scaffold\Database\Query\DSL;
 
 
 class Body implements ClauseInterface
@@ -29,7 +29,7 @@ class Body implements ClauseInterface
 
     /**
      *  control how the _source field is returned with every hit.
-     * @param $source mixed false|string|array
+     ++* @param $source mixed false|string|array
      * @return $this
      */
     public function addSource($source)

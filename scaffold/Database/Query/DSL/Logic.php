@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Scaffold\Database\Query\ElasticSearch;
+namespace Scaffold\Database\Query\DSL;
 
 
 class Logic implements ClauseInterface
@@ -22,11 +22,13 @@ class Logic implements ClauseInterface
 
     public function addBool(Boolean $bool)
     {
-        $this->container['bool']=$bool;
+        //$this->container['bool']=$bool;
+        $this->container[]=['bool'=>$bool]; //TODO
         return $this;
     }
 
     /**
+     * TODO
      * @return mixed
      */
     public function toArray()
@@ -34,7 +36,12 @@ class Logic implements ClauseInterface
         $items=[];
         foreach($this->container as $key=>$item)
         {
-            $items[$key]=$item->toArray();
+            if( is_array($item) ) {
+                $items[]=[key($item)=>current($item)->toArray()];
+            }
+            else{
+                $items[$key]=$item->toArray();
+            }
         }
         return $items;
     }

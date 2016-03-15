@@ -10,12 +10,12 @@
 
 namespace Scaffold\Database\Query;
 
-use Scaffold\Database\Query\ElasticSearch\Boolean;
-use Scaffold\Database\Query\ElasticSearch\Body;
+use Scaffold\Database\Query\DSL\Boolean;
+use Scaffold\Database\Query\DSL\Body;
 use Scaffold\Database\Model\ElasticSearchModel;
-use Scaffold\Database\Query\ElasticSearch\Filter;
-use Scaffold\Database\Query\ElasticSearch\Logic;
-use Scaffold\Database\Query\ElasticSearch\Term;
+use Scaffold\Database\Query\DSL\Filter;
+use Scaffold\Database\Query\DSL\Logic;
+use Scaffold\Database\Query\DSL\Term;
 
 class ElasticSearchBuilder extends Builder
 {
@@ -245,7 +245,7 @@ class ElasticSearchBuilder extends Builder
 
 	/**
 	 * @param Where $where
-	 * @return \Scaffold\Database\Query\ElasticSearch\Boolean;
+	 * @return \Scaffold\Database\Query\DSL\Boolean;
 	 */
 	protected function assembleWhere($where)
 	{
