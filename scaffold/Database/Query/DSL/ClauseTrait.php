@@ -50,11 +50,11 @@ trait ClauseTrait
         $ret=[];
         foreach($items as $key=>$value)
         {
-            if( $value instanceof Aggregation)
+            if( $value instanceof ClauseInterface)
             {
                 $ret[$key]=$value->toArray();
             }
-            elseif( is_array($items) )
+            elseif( is_array($value) )
             {
                 $ret[$key]=$this->toArrayHelper($value);
             }

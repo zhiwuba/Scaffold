@@ -178,7 +178,7 @@ class ElasticSearchBuilder extends Builder
 
         if( !empty($this->groups) ) {
             $aggregations=new Aggregations();
-            $aggregations->count(); //TODO
+            $aggregations->group('name_count', 'name');
             $body->addAggregations($aggregations);
         }
 

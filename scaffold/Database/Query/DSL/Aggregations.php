@@ -18,7 +18,6 @@ namespace  Scaffold\Database\Query\DSL;
  * @method Aggregation  sum($name, $field)
  * @method Aggregation  max($name, $field)
  * @method Aggregation  min($name, $field)
- * @method Aggregation  count($name, $field)
  * @method Aggregation  stats($name, $field)
  * @method Aggregation  percentile($name, $field)
  *
@@ -35,8 +34,16 @@ class Aggregations implements ClauseInterface
      */
     public function group( $name, $field )
     {
-        $this->container[$name]=(new Aggregation('terms', $field))->field();
-        return $this;
+        $agg=new Aggregation('terms', $field);
+        $this->container[$name]=$agg->field();
+        return $agg;
+    }
+
+    public function count($name, $field)
+    {
+        $agg=new Aggregation('value_count', $field );
+        $this->container[$name]=$agg->field();
+        return $agg;
     }
 
     /**
@@ -90,7 +97,6 @@ class Aggregations implements ClauseInterface
             case 'max':
             case 'min':
             case 'sum':
-            case 'count':
             case 'stats':
             case 'avg':
             {

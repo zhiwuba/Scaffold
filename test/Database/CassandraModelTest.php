@@ -80,7 +80,7 @@ class CassandraModelTest extends TestCase
 
     public function testDeleteModel()
     {
-        $user=UserModel::find()->where('user_id', '=', 12)->fetch();
+        $user=UserModel::query()->where('user_id', '=', 12)->fetch();
         $user->delete();
     }
 

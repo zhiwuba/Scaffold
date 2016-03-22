@@ -16,5 +16,8 @@ abstract class MysqlModel extends Model
 {
     protected static $builderClass=MysqlBuilder::class;
 
+    protected static $connection;
+
+
 
 }

@@ -270,9 +270,10 @@ class MysqlBuilder extends Builder
         }
 
         if(!empty($this->orders) ) {
-            $orders=array_map(function($item){
-                return $item[0] . ' ' . $item[1];
-            }, $this->orders);
+            $orders=[];
+            foreach($this->orders as $field=>$order) {
+                $orders[]="$field $order";
+            }
             $sql .= ' ORDER BY ' . implode(',' , $orders);
         }
 

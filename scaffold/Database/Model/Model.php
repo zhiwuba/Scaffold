@@ -37,6 +37,11 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     protected $originalData;
 
     /**
+     * @var array
+     */
+    protected $increments;
+
+    /**
      * @var bool todo
      */
     protected $cache=false;
@@ -67,9 +72,9 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     * get builder.
     * @return \Scaffold\Database\Query\Builder
     */
-    public static function find()
+    public static function query()
     {
-        return self::getBuilder()->select();
+        return static::getBuilder()->select();
     }
 
     /**
@@ -82,7 +87,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
         {
             $key=array_combine(static::$primaryKey, $args);
-            return self::getBuilder()->where(self::getIdQuery($key))->fetch();
+            return static::getBuilder()->where(self::getIdQuery($key))->fetch();
         }
         else
         {
@@ -101,11 +106,11 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         {
             $key=static::$primaryKey[0];
             $placeholder=implode(',', array_fill(0, count($args), '?'));
-            return self::getBuilder()->where("$key in ($placeholder)", $args)->fetchAll();
+            return static::getBuilder()->where("$key in ($placeholder)", $args)->fetchAll();
         }
         else
         {
-            $builder=self::getBuilder();
+            $builder=static::getBuilder();
 
             foreach($args as $id)
             {
@@ -122,7 +127,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     */
     public function delete()
     {
-        $ret=self::getBuilder()->delete()->where($this->getIdQuery())->execute();
+        $ret=static::getBuilder()->delete()->where($this->getIdQuery())->execute();
         return $ret;
     }
 
@@ -131,13 +136,32 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
      * @param int|array
      * @return bool
     */
-    public static function destroy()
+    public static function destroy($ids)
     {
+        //TODO
+        //  [1,2,3] 1
+        //  [[1,1], [2,2]]  [1,2]
+
+        /*if( count(static::$primaryKey)==1 )
+        {
+            if( is_array($ids) )
+            {
+                static::getBuilder()->select()->where( ,'in')
+            }
+            else
+            {
+            }
+        }
+        else if( count(static::$primaryKey)>1 )
+        {
+        }*/
+
         $args=func_get_args();
         if( count($args)==count(static::$primaryKey) && Utility::isNormalArray($args) )
         {
             $data=array_combine(static::$primaryKey, $args);
-            $ret=self::getBuilder()->delete()->where($data)->execute();
+
+            $ret=static::getBuilder()->delete()->where($data)->execute();
             return $ret;
         }
         else
@@ -157,14 +181,24 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
 
         if( empty($this->originalData) )
         {
-            $ret=self::getBuilder()->insert()->values($dirtyData)->execute();
+            $ret=static::getBuilder()->insert()->values($dirtyData)->execute();
             return $ret;
         }
         else
         {
-            $ret=self::getBuilder()->update()->set($dirtyData)->where($this->getIdQuery())->execute();
+            $ret=static::getBuilder()->update()->set($dirtyData)->setIncrements($this->increments)->where($this->getIdQuery())->execute();
             return $ret;
         }
+    }
+
+    public function increment($column, $amount=1)
+    {
+        $this->increments[$column]=$amount;
+    }
+
+    public function decrement($column, $amount=1)
+    {
+        $this->increments[$column]=-$amount;
     }
 
     /**
@@ -177,6 +211,9 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         return !Utility::isSubSet($this->getArrayCopy() ,$this->originalData);
     }
 
+    /**
+     * @return array
+     */
     public function getDirtyData()
     {
         $dirtyData=[];
@@ -190,6 +227,23 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         return $dirtyData;
     }
 
+    /**
+     * @return array
+     */
+    public function getOriginalData()
+    {
+        return $this->originalData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        $copy=self::getArrayCopy();
+        $data=array_merge($this->originalData, $copy);
+        return $data;
+    }
 
     /**
     *  get query object.
@@ -203,6 +257,19 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
         return $query;
     }
 
+    /**
+     *  get primary id data.
+     * @return array
+     */
+    public function getKey()
+    {
+        return array_values(Utility::arrayPick(self::getData(), static::$primaryKey));
+    }
+
+    public function getKeyName()
+    {
+        return static::$primaryKey;
+    }
 
     /**
      * get primary id query.
@@ -213,9 +280,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     {
         if( empty($keys) )
         {
-            $copy=self::getArrayCopy();
-            $data=array_merge($this->originalData, $copy);
-            $keys=Utility::arrayPick($data, static::$primaryKey);
+            $keys=Utility::arrayPick(self::getData(), static::$primaryKey);
         }
 
         $keys=static::processData($keys);
@@ -239,7 +304,7 @@ abstract class Model extends \ArrayObject implements \JsonSerializable
     }
 
     /**
-    * to json.
+    * object to json.
     */
     public function jsonSerialize()
     {

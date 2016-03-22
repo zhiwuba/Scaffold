@@ -181,7 +181,7 @@ abstract class Builder
         $order=strtolower($order);
         if( in_array($order, ['asc', 'desc']) )
         {
-            array_push($this->orders, [$field, $order]);
+            $this->orders[$field]=$order;
         }
         return $this;
     }
