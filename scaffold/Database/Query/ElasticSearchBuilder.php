@@ -10,6 +10,7 @@
 
 namespace Scaffold\Database\Query;
 
+use Scaffold\Database\Query\DSL\Aggregations;
 use Scaffold\Database\Query\DSL\Boolean;
 use Scaffold\Database\Query\DSL\Body;
 use Scaffold\Database\Model\ElasticSearchModel;
@@ -176,7 +177,9 @@ class ElasticSearchBuilder extends Builder
 		}
 
         if( !empty($this->groups) ) {
-            //https://www.elastic.co/guide/en/elasticsearch/reference/1.4/_executing_aggregations.html
+            $aggregations=new Aggregations();
+            $aggregations->count(); //TODO
+            $body->addAggregations($aggregations);
         }
 
 		if( !empty($this->orders) ) {
@@ -227,8 +230,8 @@ class ElasticSearchBuilder extends Builder
 			}
 			$script_params[$count_name]= abs($value);
 		}
-		if( !empty($scripts) && !empty($script_params) )
-		{
+
+		if( !empty($scripts) && !empty($script_params) ) {
 			$params['body']['script']=implode(';', $scripts);
 			$params['body']['params']=$script_params;
 		}

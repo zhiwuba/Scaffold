@@ -29,8 +29,8 @@ class Body implements ClauseInterface
 
     /**
      *  control how the _source field is returned with every hit.
-     ++* @param $source mixed false|string|array
-     * @return $this
+     *  @param $source mixed false|string|array
+     *  @return $this
      */
     public function addSource($source)
     {
@@ -63,26 +63,24 @@ class Body implements ClauseInterface
         return $this;
     }
 
-    public function addHeightLight()
+    /**
+     * @param array $heightLight
+     * @return $this
+     */
+    public function addHeightLight($heightLight)
     {
-        //TODO
+        $this->container['highlight']=$heightLight;
+        return $this;
     }
 
-
     /**
-     * @return mixed
+     *  like group of sql. but more
+     * @param Aggregations $aggregations
+     * @return $this
      */
-    public function toArray()
+    public function addAggregations(Aggregations $aggregations)
     {
-        $clauses=[];
-        foreach($this->container as $key=>$value)
-        {
-            if( is_object($value) ){
-                $clauses[$key]=$value->toArray();
-            }else{
-                $clauses[$key]=$value;
-            }
-        }
-        return $clauses;
+        $this->container['aggregations']=$aggregations;
+        return $this;
     }
 }

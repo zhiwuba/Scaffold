@@ -41,17 +41,4 @@ class Boolean implements ClauseInterface
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function toArray()
-    {
-        $clauses=[];
-        foreach($this->container as $key=>$clause)
-        {
-            $clauses[$key]=$clause->toArray();
-        }
-        return $clauses;
-    }
-
 }

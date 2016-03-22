@@ -34,13 +34,4 @@ class Query implements ClauseInterface
         $this->container['minimum_should_match']=$min;
         return $this;
     }
-
-
-    /**
-     * @return mixed
-     */
-    public function toArray()
-    {
-        // TODO: Implement toArray() method.
-    }
 }

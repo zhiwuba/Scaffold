@@ -32,5 +32,40 @@ trait ClauseTrait
     {
         return new static;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->toArrayHelper($this->container);
+    }
+
+    /**
+     * @param $items array
+     * @return array
+     */
+    private function toArrayHelper($items)
+    {
+        $ret=[];
+        foreach($items as $key=>$value)
+        {
+            if( $value instanceof Aggregation)
+            {
+                $ret[$key]=$value->toArray();
+            }
+            elseif( is_array($items) )
+            {
+                $ret[$key]=$this->toArrayHelper($value);
+            }
+            else
+            {
+                $ret[$key]=$value;
+            }
+        }
+        return $ret;
+    }
+
+
 }
 

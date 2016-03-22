@@ -26,23 +26,4 @@ class Logic implements ClauseInterface
         $this->container[]=['bool'=>$bool]; //TODO
         return $this;
     }
-
-    /**
-     * TODO
-     * @return mixed
-     */
-    public function toArray()
-    {
-        $items=[];
-        foreach($this->container as $key=>$item)
-        {
-            if( is_array($item) ) {
-                $items[]=[key($item)=>current($item)->toArray()];
-            }
-            else{
-                $items[$key]=$item->toArray();
-            }
-        }
-        return $items;
-    }
 }

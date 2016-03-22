@@ -154,12 +154,4 @@ class Term implements ClauseInterface
         $this->container=['match'=>[$field=>$value]];
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function toArray()
-    {
-        return $this->container;
-    }
 }

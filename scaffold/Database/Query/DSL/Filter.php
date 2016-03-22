@@ -15,21 +15,7 @@ class Filter implements ClauseInterface
 
     public function addBool(Boolean $bool)
     {
-        $this->container['bool']=$bool;
+        $this->container['bool'] = $bool;
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function toArray()
-    {
-        $clauses=[];
-        foreach($this->container as $key=>$clause)
-        {
-            $clauses[$key]=$clause->toArray();
-        }
-        return $clauses;
-    }
-
 }
