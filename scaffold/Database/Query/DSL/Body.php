@@ -17,7 +17,8 @@ class Body implements ClauseInterface
 
     public function addFilter(Filter $filter)
     {
-        $this->container['filter']=$filter;
+        //TODO query-filtered-[query, filter]
+        $this->container['query']['filtered']['filter']=$filter;
         return $this;
     }
 
@@ -75,12 +76,13 @@ class Body implements ClauseInterface
 
     /**
      *  like group of sql. but more
-     * @param Aggregations $aggregations
+     * @param string $name
+     * @param Aggregation $aggregation
      * @return $this
      */
-    public function addAggregations(Aggregations $aggregations)
+    public function addAggregation($name, Aggregation $aggregation)
     {
-        $this->container['aggregations']=$aggregations;
+        $this->container['aggregations'][$name]=$aggregation;
         return $this;
     }
 }

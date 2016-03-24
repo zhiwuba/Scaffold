@@ -10,13 +10,15 @@
 
 namespace Scaffold\Database\Query;
 
-use Scaffold\Database\Query\DSL\Aggregations;
+use Scaffold\Database\Profile\Profile;
+use Scaffold\Database\Query\DSL\Aggregation;
 use Scaffold\Database\Query\DSL\Boolean;
 use Scaffold\Database\Query\DSL\Body;
 use Scaffold\Database\Model\ElasticSearchModel;
 use Scaffold\Database\Query\DSL\Filter;
 use Scaffold\Database\Query\DSL\Logic;
 use Scaffold\Database\Query\DSL\Term;
+use Scaffold\Helper\Utility;
 
 class ElasticSearchBuilder extends Builder
 {
@@ -46,7 +48,27 @@ class ElasticSearchBuilder extends Builder
 	*/
 	protected $id;
 
-	public function getBaseParam()
+    /**
+     * @var $aggregation Aggregation
+     */
+    protected $aggregation;
+
+
+    protected $aggregation_type='group';
+
+
+    /**
+     * ElasticSearchBuilder constructor.
+     * @param $tableName
+     */
+    public function __construct($tableName)
+    {
+        $this->aggregation=new Aggregation(); //TODO
+        parent::__construct($tableName);
+    }
+
+
+    public function getBaseParam()
 	{
 		$param=[
 			'routing'=>$this->routing,
@@ -139,28 +161,30 @@ class ElasticSearchBuilder extends Builder
     {
         $params=$this->assembleSelect();
         $result=static::getConnection()->count($params);
-        return $result;
+        return $result['count'];
     }
 
     public function max($column)
     {
-        $this->orders[]=[$column, 'desc'];
+        $this->orders[$column]='desc';
         $this->take=1;
 		$result=$this->search();
-        return $result;
+        return Utility::arrayGet($result, 'hits.hits.0._source.' . $column);
     }
 
     public function min($column)
     {
-        $this->orders[]=[$column, 'asc'];
+        $this->orders[$column]= 'asc';
         $this->take=1;
 		$result=$this->search();
-		return $result;
+        return Utility::arrayGet($result, 'hits.hits.0._source.'.$column);
     }
 
     public function sum($column)
     {
-
+        $this->aggregation_type='sum';
+        $result=$this->search();
+        return $result;
     }
 
     protected function assembleSelect()
@@ -177,9 +201,13 @@ class ElasticSearchBuilder extends Builder
 		}
 
         if( !empty($this->groups) ) {
-            $aggregations=new Aggregations();
-            $aggregations->group('name_count', 'name');
-            $body->addAggregations($aggregations);
+            $root=$body;
+            foreach($this->groups as $field) {
+                $name=$field .'_'. $this->aggregation_type;
+                $agg=call_user_func_array([(new Aggregation()), $this->aggregation_type], [$field])->field(20);
+                $root->addAggregation($name, $agg);
+                $root=$agg;
+            }
         }
 
 		if( !empty($this->orders) ) {

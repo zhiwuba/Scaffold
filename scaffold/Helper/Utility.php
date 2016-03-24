@@ -105,6 +105,26 @@ class Utility
     }
 
     /**
+     * @param array $arr
+     * @param string $key
+     * @return mixed
+     */
+    public static function arrayGet(array $arr, $key)
+    {
+        $keys=explode('.', $key);
+        $pointer=&$arr;
+        foreach($keys as $path)
+        {
+            if( array_key_exists($path, $pointer) ){
+                $pointer=&$pointer[$path];
+            }else{
+                return NULL;
+            }
+        }
+        return $pointer;
+    }
+
+    /**
     *  whether array1 is array2 's subset or not.
      * different from array_diff_assoc().
      * @param array $array1
