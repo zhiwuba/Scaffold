@@ -15,13 +15,24 @@ class Query implements ClauseInterface
 {
     use ClauseTrait;
 
-    /**
-     * @param Boolean $bool
-     * @return $this
-     */
+    public function multiMatch($fields, $query)
+    {
+        $this->container['multi_match']=[
+            'query'=>$query,
+            'fields'=>$fields
+        ];
+        return $this;
+    }
+
     public function addBool(Boolean $bool)
     {
         $this->container['bool']=$bool;
+        return $this;
+    }
+
+    public function addFilter(Filter $filter)
+    {
+        $this->container['filter']=$filter;
         return $this;
     }
 

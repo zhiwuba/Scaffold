@@ -155,6 +155,14 @@ class MysqlBuilder extends Builder
         return $this->aggressive("sum($column)");
     }
 
+    /**
+     * TODO
+     */
+    public function avg($column)
+    {
+        return 0;
+    }
+
     protected function aggressive($aggExp)
     {
         $this->restrictScenario('select');

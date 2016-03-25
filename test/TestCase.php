@@ -76,7 +76,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $authors=explode(' ', $author);
         $marks=explode(' ', $mark);
 
-        for($i=1; $i<=3000;$i++)
+        foreach(range(1, 3000) as $i)
         {
             shuffle($marks);
 
@@ -85,7 +85,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $paint['name']= $names[rand(0, count($names)-1)];
             $paint['filename']=$paint['name'] . '\'s file, code is ' . $i;
             $paint['author']=$authors[rand(0, count($authors)-1)];
-            $paint['mark']= implode('' , array_slice($marks , 0, rand(1, count($marks))) );
+            $paint['mark']= implode(' ' , array_slice($marks , 0, rand(1, count($marks))) );
             $paint['created_at']='2012-02-06';
             $paint['comments']=rand(0,10000);
             $paint['likes']=rand(0, 10000);

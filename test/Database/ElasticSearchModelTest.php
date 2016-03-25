@@ -113,13 +113,30 @@ class ElasticSearchModelTest extends TestCase
 
     public function testMinMaxSum()
     {
-        $ret=PaintModel::query()->andWhere('name', '=', 'kim')->groupBy('likes')->sum('likes');
-        echo $ret, "\n";
+        $ret=PaintModel::query()->groupBy('name')->sum('likes');
+        //print_r($ret);
+
+        $ret=PaintModel::query()->groupBy('name')->groupBy('author')->min('likes');
+        //print_r($ret);
+
+        $ret=PaintModel::query()->groupBy('name')->groupBy('author')->max('likes');
+        //print_r($ret);
+
+        $ret=PaintModel::query()->groupBy('name')->groupBy('author')->avg('likes');
+        //print_r($ret);
+
+        $ret=PaintModel::query()->avg('likes');
+        //print_r($ret);
     }
 
     public function testCount()
     {
         $ret=PaintModel::query()->andWhere('name', '=', 'kim')->count();
         echo $ret, "\n";
+    }
+
+    public function testQuery()
+    {
+
     }
 }

@@ -22,7 +22,6 @@ namespace  Scaffold\Database\Query\DSL;
  * @method Aggregation  stats(string $field)
  * @method Aggregation  percentile(string $field)
  *
- * TODO  what is the different between aggregation and sorting?
  */
 class Aggregation implements ClauseInterface
 {
@@ -51,9 +50,13 @@ class Aggregation implements ClauseInterface
     }
 
 
-    public function field($size=10)
+    public function field($size=0)
     {
-        $this->container[$this->type] = ['field'=>$this->field, 'size'=>$size];
+        $pack['field']=$this->field;
+        if( !empty($size) ){
+            $pack['size']=$size;
+        }
+        $this->container[$this->type] = $pack;
         return $this;
     }
 

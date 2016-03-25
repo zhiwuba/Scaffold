@@ -48,14 +48,6 @@ class ElasticSearchBuilder extends Builder
 	*/
 	protected $id;
 
-    /**
-     * @var $aggregation Aggregation
-     */
-    protected $aggregation;
-
-
-    protected $aggregation_type='group';
-
 
     /**
      * ElasticSearchBuilder constructor.
@@ -63,7 +55,6 @@ class ElasticSearchBuilder extends Builder
      */
     public function __construct($tableName)
     {
-        $this->aggregation=new Aggregation(); //TODO
         parent::__construct($tableName);
     }
 
@@ -105,6 +96,16 @@ class ElasticSearchBuilder extends Builder
 		static::$connection=$connection;
 	}
 
+    /**
+     * @param $field
+     * @return $this
+     */
+    public function groupBy($field)
+    {
+        $this->groups[$field]='group';
+        return $this;
+    }
+
     public function execute()
     {
         $connection=static::getConnection();
@@ -128,19 +129,11 @@ class ElasticSearchBuilder extends Builder
         return $result;
     }
 
-	public function search()
-	{
-		$connection=static::getConnection();
-		$params=$this->assemble();
-		$result=$connection->search($params);
-		return $result;
-	}
-
     public function fetch()
 	{
         $this->restrictScenario('select');
 
-        $response = $this->search();
+        $response = $this->doSearch();
         $models=$this->responseToModels($response);
         return count($models)? $models[0] : null ;
     }
@@ -149,7 +142,7 @@ class ElasticSearchBuilder extends Builder
     {
         $this->restrictScenario('select');
 
-        $response=$this->search();
+        $response=$this->doSearch();
         $models=$this->responseToModels($response);
         return $models;
     }
@@ -166,24 +159,36 @@ class ElasticSearchBuilder extends Builder
 
     public function max($column)
     {
-        $this->orders[$column]='desc';
-        $this->take=1;
-		$result=$this->search();
-        return Utility::arrayGet($result, 'hits.hits.0._source.' . $column);
+        return $this->aggregate('max', $column);
     }
 
     public function min($column)
     {
-        $this->orders[$column]= 'asc';
-        $this->take=1;
-		$result=$this->search();
-        return Utility::arrayGet($result, 'hits.hits.0._source.'.$column);
+        return $this->aggregate('min', $column);
     }
 
     public function sum($column)
     {
-        $this->aggregation_type='sum';
-        $result=$this->search();
+        return $this->aggregate('sum', $column);
+    }
+
+    public function avg($column)
+    {
+        return $this->aggregate('avg',$column);
+    }
+
+    protected function aggregate($type, $column)
+    {
+        $this->groups[$column]=$type;
+        $result=$this->doSearch();
+        return $this->parseAggregation($result);
+    }
+
+    protected function doSearch()
+    {
+        $connection=static::getConnection();
+        $params=$this->assemble();
+        $result=$connection->search($params);
         return $result;
     }
 
@@ -202,10 +207,9 @@ class ElasticSearchBuilder extends Builder
 
         if( !empty($this->groups) ) {
             $root=$body;
-            foreach($this->groups as $field) {
-                $name=$field .'_'. $this->aggregation_type;
-                $agg=call_user_func_array([(new Aggregation()), $this->aggregation_type], [$field])->field(20);
-                $root->addAggregation($name, $agg);
+            foreach($this->groups as $field=>$type) {
+                $agg=call_user_func_array([(new Aggregation()), $type], [$field])->field();
+                $root->addAggregation($field, $agg);
                 $root=$agg;
             }
         }
@@ -402,5 +406,42 @@ class ElasticSearchBuilder extends Builder
         {
             return $response['hits']['hits'];
         }
+    }
+
+    protected function parseAggregation($response)
+    {
+        $aggregations=$response['aggregations'];
+        return $this->aggregationToArray(array_keys($this->groups) , $aggregations);
+    }
+
+    private function aggregationToArray($groups, $response)
+    {
+        $field=array_shift($groups);
+        $aggregation=$response[$field];
+
+        if( array_key_exists('value', $aggregation) )
+        {
+            return $aggregation['value'];
+        }
+
+        $ret=[];
+        if( array_key_exists('buckets', $aggregation) )
+        {
+            $buckets=$aggregation['buckets'];
+            foreach($buckets as $bucket)
+            {
+                $value=$this->aggregationToArray($groups, $bucket);
+                if( array_key_exists('key', $bucket) )
+                {
+                    $ret[$bucket['key']]=$value;
+                }
+                else
+                {
+                    $ret[]=$value;
+                }
+            }
+        }
+
+        return $ret;
     }
 }

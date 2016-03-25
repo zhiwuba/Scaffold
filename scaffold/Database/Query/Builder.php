@@ -265,6 +265,8 @@ abstract class Builder
 
     abstract public function sum($column);
 
+    abstract public function avg($column);
+
     public function restrictScenario($scenario)
     {
         if( (is_array($scenario)&&!in_array($this->scenario, $scenario)) || (is_string($scenario)&& $this->scenario!=$scenario)) {
