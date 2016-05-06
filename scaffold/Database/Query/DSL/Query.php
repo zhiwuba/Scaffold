@@ -15,15 +15,6 @@ class Query implements ClauseInterface
 {
     use ClauseTrait;
 
-    public function multiMatch($fields, $query)
-    {
-        $this->container['multi_match']=[
-            'query'=>$query,
-            'fields'=>$fields
-        ];
-        return $this;
-    }
-
     public function addBool(Boolean $bool)
     {
         $this->container['bool']=$bool;
@@ -33,6 +24,52 @@ class Query implements ClauseInterface
     public function addFilter(Filter $filter)
     {
         $this->container['filter']=$filter;
+        return $this;
+    }
+
+    public function matchAll()
+    {
+        $this->container['match_all']=[];
+        return $this;
+    }
+
+    /**
+     * @param $multiMatch array
+     * @return $this
+     */
+    public function multiMatch($multiMatch)
+    {
+        $this->container['multi_match']=$multiMatch;
+        return $this;
+    }
+
+    /**
+     * @param $match array
+     * @return $this
+     */
+    public function match($match)
+    {
+        $this->container['match']=$match;
+        return $this;
+    }
+
+    /**
+     * @param $query array
+     * @return $this
+     */
+    public function common($query)
+    {
+        $this->container['common']=$query;
+        return $this;
+    }
+
+    /**
+     * @param $queryString array
+     * @return $this
+     */
+    public function queryString($queryString)
+    {
+        $this->container['query_string']=$queryString;
         return $this;
     }
 

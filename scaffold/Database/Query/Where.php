@@ -24,7 +24,7 @@ class Condition
         'rlike', 'regexp', 'not regexp',
         '~', '~*', '!~', '!~*',
         'similar to', 'not similar to',
-        'in' , 'not in',
+        'in' , 'not in', 'match',
     ];
 
     public static $negativeOperate=[

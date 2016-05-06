@@ -33,9 +33,10 @@ abstract class Controller
         }
     }
 
-    public function registerMiddleware()
+    public function registerMiddleware($middleware)
     {
-        $this->middleWares;
+        $this->middleWares[]=$middleware;
+        return $this;
     }
 
 }

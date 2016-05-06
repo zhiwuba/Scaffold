@@ -17,11 +17,25 @@ use Scaffold\Database\Query\DSL\Body;
 use Scaffold\Database\Model\ElasticSearchModel;
 use Scaffold\Database\Query\DSL\Filter;
 use Scaffold\Database\Query\DSL\Logic;
+use Scaffold\Database\Query\DSL\Query;
 use Scaffold\Database\Query\DSL\Term;
 use Scaffold\Helper\Utility;
 
 class ElasticSearchBuilder extends Builder
 {
+    /**
+     *   Query type
+     */
+    const QUERY_MATCH='match';
+
+    const QUERY_MATCH_ALL='match_all';
+
+    const QUERY_MULTI_MATCH='multi_match';
+
+    const QUERY_COMMON='common';
+
+    const QUERY_STRING='query_string';
+
 	/**
 	 * @var \ElasticSearch\Client
 	 */
@@ -31,6 +45,11 @@ class ElasticSearchBuilder extends Builder
 	 * @var Profile
 	 */
 	public static $profile;
+
+    /**
+     * @var array
+     */
+    protected $match;
 
 	/**
 	* @var string
@@ -106,6 +125,17 @@ class ElasticSearchBuilder extends Builder
         return $this;
     }
 
+    /**
+     * @param $type string static::QUERY_MATCH | static::QUERY_MATCH_ALL | ...
+     * @param $body
+     * @return $this
+     */
+    public function whereMatch($type, $body)
+    {
+        $this->match=['type'=>$type, 'body'=>$body];
+        return $this;
+    }
+
     public function execute()
     {
         $connection=static::getConnection();
@@ -177,6 +207,7 @@ class ElasticSearchBuilder extends Builder
         return $this->aggregate('avg',$column);
     }
 
+
     protected function aggregate($type, $column)
     {
         $this->groups[$column]=$type;
@@ -198,6 +229,10 @@ class ElasticSearchBuilder extends Builder
 
         if( !empty($this->selects) ) {
             $body->addSource($this->selects);
+        }
+
+        if( !empty($this->match) ){
+            $body->addQuery($this->assembleQuery());
         }
 
 		$bool=$this->assembleWhere($this->where);
@@ -330,6 +365,33 @@ class ElasticSearchBuilder extends Builder
         return $bool;
 	}
 
+    protected function assembleQuery()
+    {
+        $query=new Query();
+        $type=$this->match['key'];
+        $body=$this->match['body'];
+        switch($type)
+        {
+            case static::QUERY_MATCH:
+                $query->match($body);
+                break;
+            case static::QUERY_MATCH_ALL:
+                $query->matchAll();
+                break;
+            case static::QUERY_MULTI_MATCH:
+                $query->multiMatch($body);
+                break;
+            case static::QUERY_COMMON:
+                $query->common($body);
+                break;
+            case static::QUERY_STRING:
+                $query->queryString($body);
+                break;
+        }
+        return $query;
+    }
+
+
 	/**
 	*  build condition
 	 * @param $condition Condition
@@ -444,4 +506,7 @@ class ElasticSearchBuilder extends Builder
 
         return $ret;
     }
+
+
+
 }

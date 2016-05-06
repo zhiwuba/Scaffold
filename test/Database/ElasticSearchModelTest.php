@@ -137,6 +137,6 @@ class ElasticSearchModelTest extends TestCase
 
     public function testQuery()
     {
-
+        $ret=PaintModel::query()->search();
     }
 }

@@ -15,7 +15,7 @@
         <testsuite name="database">
             <directory>test/Database</directory>
         </testsuite>
-        <testsuite name="cache">
+        <!--testsuite name="cache">
             <directory>test/Cache</directory>
         </testsuite>
         <testsuite name="http">
@@ -26,7 +26,7 @@
         </testsuite>
         <testsuite name="view">
             <directory>test/View</directory>
-        </testsuite>
+        </testsuite-->
     </testsuites>
 
 </phpunit>

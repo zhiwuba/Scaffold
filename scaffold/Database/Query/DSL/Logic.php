@@ -22,8 +22,7 @@ class Logic implements ClauseInterface
 
     public function addBool(Boolean $bool)
     {
-        //$this->container['bool']=$bool;
-        $this->container[]=['bool'=>$bool]; //TODO
+        $this->container[]=['bool'=>$bool];
         return $this;
     }
 }

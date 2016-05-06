@@ -18,7 +18,7 @@ class MainController extends Controller
     public function __construct()
     {
         $this->middleWares=['csrf', 'auth'];
-        //parent::__construct();
+        parent::__construct();
     }
 
 
@@ -41,7 +41,5 @@ class MainController extends Controller
             echo $validator->messages();
         }
     }
-
-
 }
 
